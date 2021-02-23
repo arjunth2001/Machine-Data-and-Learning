@@ -69,17 +69,20 @@ with open("overfit.txt", "r") as f:
     initial_chromosome = json.load(f)
 
 population = get_init(initial_chromosome)
-fitness = []
+fitness = get_fitness(population)
 
 for gen in range(MAX_GEN+1):
-    fitness = get_fitness(population)
+    population = population[:POPULATION_SIZE]
+    fitness = fitness[:POPULATION_SIZE]
     sorted_fitness_index = np.argsort(fitness)
     population = population[sorted_fitness_index]
     fitness = fitness[sorted_fitness_index]
     selected_population = population[: MATE_POOL_SIZE]
     selected_fitness = fitness[: MATE_POOL_SIZE]
     children = breed(selected_population, selected_fitness)
-    population = np.concatenate((selected_population, children), axis=0)
+    children_fitness = get_fitness(children)
+    population = np.concatenate((population, children), axis=0)
+    fitness = np.concatenate((children, children_fitness), axis=0)
 
 final_fitness = np.min(get_fitness(population))
 print("Answer", final_fitness)
