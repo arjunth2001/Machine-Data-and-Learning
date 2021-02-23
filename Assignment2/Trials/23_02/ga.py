@@ -3,11 +3,11 @@ import client as ta
 import json
 SECRET = 'z60uCu1jsJeEi4n96iH7qwpMMnvIO1BEdnbC38CokXIn9y9lSR'
 # TODO: We need to fig out these values... hmm
-MUTATION_PERC = 0.4
-MUTATION_RANGE = 0.8
-POPULATION_SIZE = 30
-MATE_POOL_SIZE = 15
-MAX_GEN = 20
+MUTATION_PERC = 0.3
+MUTATION_RANGE = 1
+POPULATION_SIZE = 7
+MATE_POOL_SIZE = 3
+MAX_GEN = 10
 initial_chromosome = []
 ctr = 0
 
