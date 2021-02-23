@@ -1,15 +1,13 @@
 import numpy as np
 import client as ta
 import json
-# Add our Secret here...
-SECRET = ""
-#!!! Go through the code once and do a trial run xD... I haven't run it..
+SECRET = 'z60uCu1jsJeEi4n96iH7qwpMMnvIO1BEdnbC38CokXIn9y9lSR'
 # TODO: We need to fig out these values... hmm
 MUTATION_PERC = 0.8
 MUTATION_RANGE = 1
-POPULATION_SIZE = 20
-MATE_POOL_SIZE = 10
-MAX_GEN = 20
+POPULATION_SIZE = 8
+MATE_POOL_SIZE = 4
+MAX_GEN = 8
 initial_chromosome = []
 
 
@@ -44,7 +42,6 @@ def breed(selected_population):
     children.append(child1)
     children.append(child2)
     while(True):
-
         child1, child2 = cross(
             np.choice(selected_population), np.choice(selected_population))
         if child1 not in children:
@@ -55,7 +52,6 @@ def breed(selected_population):
             children.append(child2)
         if len(children) == POPULATION_SIZE-MATE_POOL_SIZE:
             break
-
     return mutate_children(np.array(children))
 
 
@@ -77,7 +73,7 @@ fitness = []
 
 for gen in range(MAX_GEN+1):
     fitness = get_fitness(population)
-    sorted_fitness_index = fitness.argsort()
+    sorted_fitness_index = np.argsort(fitness)
     population = population[sorted_fitness_index]
     fitness = fitness[sorted_fitness_index]
     selected_population = population[: MATE_POOL_SIZE]

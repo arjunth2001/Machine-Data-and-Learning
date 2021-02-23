@@ -28,7 +28,6 @@ def get_errors(id, vector):
 def get_overfit_vector(id):
     return json.loads(send_request(id, [0], 'getoverfit'))
 
-# Replace 'SECRET_KEY' with your team's secret key (Will be sent over email)
 if __name__ == "__main__":
-    print(get_errors('SECRET_KEY', get_overfit_vector('SECRET_KEY')))
-    print(get_overfit_vector('SECRET_KEY'))
+    print(get_errors('z60uCu1jsJeEi4n96iH7qwpMMnvIO1BEdnbC38CokXIn9y9lSR', get_overfit_vector('z60uCu1jsJeEi4n96iH7qwpMMnvIO1BEdnbC38CokXIn9y9lSR')))
+    print(get_overfit_vector('z60uCu1jsJeEi4n96iH7qwpMMnvIO1BEdnbC38CokXIn9y9lSR'))
