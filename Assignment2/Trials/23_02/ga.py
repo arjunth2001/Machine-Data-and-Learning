@@ -3,13 +3,13 @@ import client as ta
 import json
 SECRET = 'z60uCu1jsJeEi4n96iH7qwpMMnvIO1BEdnbC38CokXIn9y9lSR'
 # TODO: We need to fig out these values... hmm
-MUTATION_PERC = 0.8
+MUTATION_PERC = 0.3
 MUTATION_RANGE = 1
-POPULATION_SIZE = 8
-MATE_POOL_SIZE = 4
-MAX_GEN = 8
+POPULATION_SIZE = 7
+MATE_POOL_SIZE = 3
+MAX_GEN = 5
 initial_chromosome = []
-
+ctr = 0
 
 def mutate_children(children, low=-MUTATION_RANGE, high=MUTATION_RANGE):
     for i in range(len(children)):
@@ -23,11 +23,20 @@ def mutate_children(children, low=-MUTATION_RANGE, high=MUTATION_RANGE):
 
 def get_fitness(chromosomes):
     fitness = []
+    global ctr
     for chromosome in chromosomes:
         ta_answer = ta.get_errors(SECRET, list(chromosome))
+        #ta_answer = [0.1, 0.5]
         fitness.append(ta_answer[0]+ta_answer[1])
+        print(f'Iteration number: {ctr}, train error: {ta_answer[0]}, validation error: {ta_answer[1]}')
+        ctr += 1
     return np.array(fitness)
 
+def isIn(given_array, actual_list):
+    for element in actual_list:
+        if np.array_equal(element, given_array):
+            return True
+    return False
 
 def cross(parent1, parent2):
     point = np.random.randint(4, 7)
@@ -35,20 +44,31 @@ def cross(parent1, parent2):
     child2 = np.concatenate((parent2[:point], parent1[point:]), axis=0)
     return child1, child2
 
-
 def breed(selected_population):
     children = []
     child1, child2 = cross(selected_population[0], selected_population[1])
     children.append(child1)
     children.append(child2)
-    while(True):
-        child1, child2 = cross(
-            np.choice(selected_population), np.choice(selected_population))
-        if child1 not in children:
+    mating_combinations = []
+    while len(children) < (POPULATION_SIZE - MATE_POOL_SIZE):
+        # combination_already_done = False
+        par_num1 = np.random.randint(0,np.shape(selected_population)[0])
+        par_num2 = (par_num1 + 1) % np.shape(selected_population)[0]
+        # while par_num2 == par_num1:
+        #     par_num2 = np.random.randint(0,np.shape(selected_population)[0])
+        # for combination in mating_combinations:
+        #     if (combination[0] == par_num1 and combination[1] == par_num2) or (combination[0] == par_num2 and combination[1] == par_num1):
+        #         combination_already_done = True
+        #         break
+        # if combination_already_done:
+        #     continue
+        mating_combinations.append([par_num1, par_num2])
+        child1, child2 = cross(selected_population[par_num1], selected_population[par_num2])
+        if not isIn(child1, children):
             children.append(child1)
         if len(children) == POPULATION_SIZE-MATE_POOL_SIZE:
             break
-        if child2 not in children:
+        if not isIn(child2, children):       
             children.append(child2)
         if len(children) == POPULATION_SIZE-MATE_POOL_SIZE:
             break
@@ -79,10 +99,10 @@ for gen in range(MAX_GEN+1):
     fitness = fitness[:POPULATION_SIZE]
     selected_population = population[: MATE_POOL_SIZE]
     selected_fitness = fitness[: MATE_POOL_SIZE]
-    children = breed(selected_population, selected_fitness)
+    children = breed(selected_population)
     children_fitness = get_fitness(children)
     population = np.concatenate((population, children), axis=0)
-    fitness = np.concatenate((children, children_fitness), axis=0)
+    fitness = np.concatenate((fitness, children_fitness), axis=0)
 
 final_fitness = np.min(fitness)
 print("Answer", final_fitness)
