@@ -84,5 +84,5 @@ for gen in range(MAX_GEN+1):
     population = np.concatenate((population, children), axis=0)
     fitness = np.concatenate((children, children_fitness), axis=0)
 
-final_fitness = np.min(get_fitness(population))
+final_fitness = np.min(fitness)
 print("Answer", final_fitness)
