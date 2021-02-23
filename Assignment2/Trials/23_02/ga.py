@@ -72,11 +72,11 @@ population = get_init(initial_chromosome)
 fitness = get_fitness(population)
 
 for gen in range(MAX_GEN+1):
-    population = population[:POPULATION_SIZE]
-    fitness = fitness[:POPULATION_SIZE]
     sorted_fitness_index = np.argsort(fitness)
     population = population[sorted_fitness_index]
     fitness = fitness[sorted_fitness_index]
+    population = population[:POPULATION_SIZE]
+    fitness = fitness[:POPULATION_SIZE]
     selected_population = population[: MATE_POOL_SIZE]
     selected_fitness = fitness[: MATE_POOL_SIZE]
     children = breed(selected_population, selected_fitness)
