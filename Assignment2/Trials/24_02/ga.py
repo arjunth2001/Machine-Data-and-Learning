@@ -182,7 +182,7 @@ for gen in range(MAX_GEN+1):
     parent_fitness = parents[parent_index]
     selected_parents = parents[:SELECT_TOP_PARENTS]
     selected_parent_fitness = parent_fitness[:SELECT_TOP_PARENTS]
-    rest = np.concatenate(parents[SELECT_TOP_PARENTS:], children[:])
+    rest = np.concatenate((parents[SELECT_TOP_PARENTS:], children[:]), axis=0)
     rest_fitness = np.concatenate(
         parents_fitness[SELECT_TOP_PARENTS:], children_fitness[:])
     rest_index = np.argsort(rest_fitness*-1)
