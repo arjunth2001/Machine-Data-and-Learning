@@ -10,7 +10,7 @@ MATE_POOL_SIZE = 10
 MAX_GEN = 15
 FACTOR = 1.5
 initial_chromosome = []
-min = None
+minVal = None
 
 
 def mutate_children(children, low=-MUTATION_RANGE, high=MUTATION_RANGE):
@@ -26,17 +26,17 @@ def mutate_children(children, low=-MUTATION_RANGE, high=MUTATION_RANGE):
 
 
 def get_fitness(chromosomes):
-    global min
+    global minVal
     fitness = []
     for chromosome in chromosomes:
         #ta_answer = ta.get_errors(SECRET, list(chromosome))
         ta_answer = [np.random.uniform(
             10000, 1000000), np.random.uniform(10000, 100000)]
-        if min == None:
-            min = ta_answer
+        if minVal == None:
+            minVal = ta_answer
         else:
-            if min[0]+min[1] > ta_answer[1]+ta_answer[0]:
-                min = ta_answer
+            if minVal[0]+minVal[1] > ta_answer[1]+ta_answer[0]:
+                minVal = ta_answer
         fitness.append(ta_answer[0] + FACTOR * ta_answer[1])
         print(
             f'kid: {chromosome} train error: {ta_answer[0]}, validation error: {ta_answer[1]}')
@@ -124,13 +124,40 @@ def breed(selected_population):
             break
     return mutate_children(np.array(children))
 
+# Assumes that fittest parent has high positive fitness value
+def roulette_selective_breed(selected_population, selected_fitness):
+    normal_value = np.linalg.norm(selected_fitness)
+    normalized_fitness = selected_fitness / normal_value
+    sum_value = np.sum(normalized_fitness)
+    probability_vector = normalized_fitness / sum_value
+    children = []
+    while len(children) < (POPULATION_SIZE - MATE_POOL_SIZE):
+        par_num1 = np.random.choice(np.shape(selected_population)[0], p=probability_vector)
+        par_num2 = np.random.choice(np.shape(selected_population)[0], p=probability_vector)
+        if selected_fitness[par_num1] < selected_fitness[par_num2]:
+            par_num1, par_num2 = par_num2, par_num1
+        child1, child2, child3 = cross(
+            selected_population[par_num1], selected_population[par_num2])
+        if not isIn(child1, children):
+            children.append(child1)
+        if len(children) == POPULATION_SIZE-MATE_POOL_SIZE:
+            break
+        if not isIn(child2, children):
+            children.append(child2)
+        if len(children) == POPULATION_SIZE-MATE_POOL_SIZE:
+            break
+        if not isIn(child3, children):
+            children.append(child3)
+        if len(children) == POPULATION_SIZE-MATE_POOL_SIZE:
+            break
+    return mutate_children(np.array(children))
 
 def get_init(chromosome):
     '''Gets the initial Chromosomes'''
     temp = [list(chromosome) for i in range(POPULATION_SIZE)]
     temp = np.array(temp)
     temp = mutate_children(temp)
-    for i in temp:
+    for i in range(np.shape(temp)[0]):
         factor = np.random.uniform(-0.05, 0.05)
         temp[i][0] += factor
     temp[0] = chromosome
@@ -163,12 +190,12 @@ for gen in range(MAX_GEN+1):
     rest_fitness = rest_fitness[rest_index]
     pool = np.concatenate(
         selected_parents, rest[:MATE_POOL_SIZE-SELECT_TOP_PARENTS])
-    pool_fitness = np.np.concatenate(
+    pool_fitness = np.concatenate(
         selected_parent_fitness, rest_fitness[:MATE_POOL_SIZE-SELECT_TOP_PARENTS])
     print(
         f'gen: {gen} best:{np.max(pool_fitness)}')
-    children = optimal_breed(pool, pool_fitness)
+    children = roulette_selective_breed(pool, pool_fitness)
     children_fitness = get_fitness(children)
     parents = pool
     parent_fitness = pool_fitness
-print(min)
+print(minVal)
