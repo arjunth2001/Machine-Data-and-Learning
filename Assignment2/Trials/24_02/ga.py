@@ -2,33 +2,44 @@ import numpy as np
 import client as ta
 import json
 SECRET = 'z60uCu1jsJeEi4n96iH7qwpMMnvIO1BEdnbC38CokXIn9y9lSR'
-# TODO: We need to fig out these values... hmm
-MUTATION_PERC = 0.2
+MUTATION_SIZE = 5
 MUTATION_RANGE = 1
-POPULATION_SIZE = 4
-MATE_POOL_SIZE = 2
-MAX_GEN = 4
+POPULATION_SIZE = 30
+SELECT_TOP_PARENTS = 3
+MATE_POOL_SIZE = 10
+MAX_GEN = 15
+FACTOR = 1.5
 initial_chromosome = []
-ctr = 0
+min = None
 
 
 def mutate_children(children, low=-MUTATION_RANGE, high=MUTATION_RANGE):
     for i in range(len(children)):
-        noise = np.random.uniform(low=low, high=high, size=children[i].shape)
+        noise = 1+np.random.uniform(low=low,
+                                    high=high, size=children[i].shape)
+        noise = np.where(noise == 0, np.random.uniform(0.000001, 1)+1, noise)
         indices = np.random.choice(np.arange(
-            children[i].size), replace=False, size=int(children[i].size*(1-MUTATION_PERC)))
-        noise[indices] = 0
-        children[i] += noise
+            children[i].size), replace=False, size=len(children[i])-MUTATION_SIZE)
+        noise[indices] = 1
+        children[i] *= noise
     return np.clip(children, -10, 10)
 
 
 def get_fitness(chromosomes):
+    global min
     fitness = []
     for chromosome in chromosomes:
-        ta_answer = ta.get_errors(SECRET, list(chromosome))
-        fitness.append(ta_answer[0]+ta_answer[1])
+        #ta_answer = ta.get_errors(SECRET, list(chromosome))
+        ta_answer = [np.random.uniform(
+            10000, 1000000), np.random.uniform(10000, 100000)]
+        if min == None:
+            min = ta_answer
+        else:
+            if min[0]+min[1] > ta_answer[1]+ta_answer[0]:
+                min = ta_answer
+        fitness.append(ta_answer[0] + FACTOR * ta_answer[1])
         print(
-            f'train error: {ta_answer[0]}, validation error: {ta_answer[1]}')
+            f'kid: {chromosome} train error: {ta_answer[0]}, validation error: {ta_answer[1]}')
     return np.array(fitness)
 
 
@@ -40,10 +51,17 @@ def isIn(given_array, actual_list):
 
 
 def cross(parent1, parent2):
-    point = np.random.randint(4, 7)
-    child1 = np.concatenate((parent1[:point], parent2[point:]), axis=0)
-    child2 = np.concatenate((parent2[:point], parent1[point:]), axis=0)
-    return child1, child2
+    child1 = np.where(parent1 < parent2, parent1 +
+                      np.random.uniform(0, 1)*(parent2-parent1), parent2 +
+                      np.random.uniform(0, 1)*(parent1-parent2))
+    d = np.abs(parent1-parent2)
+    a = np.random.uniform()
+    b = np.random.uniform()
+    child2 = np.where(parent1 < parent2, np.random.uniform(
+        parent1-a*d, parent2+b*d), np.random.uniform(parent2-b*d, parent2+a*d))
+    child3 = np.where(parent1 >= parent2, np.random.uniform(
+        parent1-a*d, parent2+b*d), np.random.uniform(parent2-b*d, parent2+a*d))
+    return child1, child2, child3
 
 
 def get_optimal_combinations(selected_population, selected_fitness):
@@ -52,20 +70,25 @@ def get_optimal_combinations(selected_population, selected_fitness):
     for i in range(n):
         for j in range(n):
             if i < j:
-                optimal_combinations.append([selected_fitness[i] + selected_fitness[j], i, j])
+                optimal_combinations.append(
+                    [selected_fitness[i] + selected_fitness[j], i, j])
     optimal_combinations = np.array(optimal_combinations)
-    optimal_combinations = optimal_combinations[optimal_combinations[:,0].argsort()]
+    optimal_combinations = optimal_combinations[optimal_combinations[:, 0].argsort(
+    )]
     return optimal_combinations
 
 
 def optimal_breed(selected_population, selected_fitness):
     children = []
-    mating_combinations = get_optimal_combinations(selected_population, selected_fitness)
+    mating_combinations = get_optimal_combinations(
+        selected_population, selected_fitness)
     num = -1
     while len(children) < (POPULATION_SIZE - MATE_POOL_SIZE):
         num += 1
-        par_num1 = int(mating_combinations[num % (np.shape(mating_combinations)[0])][1])
-        par_num2 = int(mating_combinations[num % (np.shape(mating_combinations)[0])][2])
+        par_num1 = int(mating_combinations[num % (
+            np.shape(mating_combinations)[0])][1])
+        par_num2 = int(mating_combinations[num % (
+            np.shape(mating_combinations)[0])][2])
         child1, child2 = cross(
             selected_population[par_num1], selected_population[par_num2])
         if not isIn(child1, children):
@@ -76,7 +99,7 @@ def optimal_breed(selected_population, selected_fitness):
             children.append(child2)
         if len(children) == POPULATION_SIZE-MATE_POOL_SIZE:
             break
-    return mutate_children(np.array(children))   
+    return mutate_children(np.array(children))
 
 
 def breed(selected_population):
@@ -105,8 +128,11 @@ def breed(selected_population):
 def get_init(chromosome):
     '''Gets the initial Chromosomes'''
     temp = [list(chromosome) for i in range(POPULATION_SIZE)]
-    temp = np.array(temp, dtype=np.double)
-    temp = mutate_children(temp, -1, 1)
+    temp = np.array(temp)
+    temp = mutate_children(temp)
+    for i in temp:
+        factor = np.random.uniform(-0.05, 0.05)
+        temp[i][0] += factor
     temp[0] = chromosome
     return temp
 
@@ -115,24 +141,34 @@ def get_init(chromosome):
 with open("overfit.txt", "r") as f:
     initial_chromosome = json.load(f)
 
-population = get_init(initial_chromosome)
-fitness = get_fitness(population)
+parents = get_init(initial_chromosome)
+parent_fitness = get_fitness(parents)
+children = np.array([])
+children_fitness = np.array([])
 
 for gen in range(MAX_GEN+1):
-    sorted_fitness_index = np.argsort(fitness)
-    population = population[sorted_fitness_index]
-    fitness = fitness[sorted_fitness_index]
+    if gen == 8:
+        TRAIN_FACTOR = 1
+        MUTATION_SIZE = 3
+    parent_index = np.argsort(-1*parent_fitness)
+    parents = parents[parent_index]
+    parent_fitness = parents[parent_index]
+    selected_parents = parents[:SELECT_TOP_PARENTS]
+    selected_parent_fitness = parent_fitness[:SELECT_TOP_PARENTS]
+    rest = np.concatenate(parents[SELECT_TOP_PARENTS:], children[:])
+    rest_fitness = np.concatenate(
+        parents_fitness[SELECT_TOP_PARENTS:], children_fitness[:])
+    rest_index = np.argsort(rest_fitness*-1)
+    rest = rest[rest_index]
+    rest_fitness = rest_fitness[rest_index]
+    pool = np.concatenate(
+        selected_parents, rest[:MATE_POOL_SIZE-SELECT_TOP_PARENTS])
+    pool_fitness = np.np.concatenate(
+        selected_parent_fitness, rest_fitness[:MATE_POOL_SIZE-SELECT_TOP_PARENTS])
     print(
-        f'gen: {gen} best:{fitness[0]}')
-    population = population[:POPULATION_SIZE]
-    fitness = fitness[:POPULATION_SIZE]
-    selected_population = population[: MATE_POOL_SIZE]
-    selected_fitness = fitness[: MATE_POOL_SIZE]
-    children = optimal_breed(selected_population, selected_fitness)
-    #children = breed(selected_population)
+        f'gen: {gen} best:{np.max(pool_fitness)}')
+    children = optimal_breed(pool, pool_fitness)
     children_fitness = get_fitness(children)
-    population = np.concatenate((population, children), axis=0)
-    fitness = np.concatenate((fitness, children_fitness), axis=0)
-
-final_fitness = np.min(fitness)
-print("Answer", final_fitness)
+    parents = pool
+    parent_fitness = pool_fitness
+print(min)
