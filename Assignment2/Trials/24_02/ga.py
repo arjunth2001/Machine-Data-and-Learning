@@ -3,11 +3,11 @@ import client as ta
 import json
 SECRET = 'z60uCu1jsJeEi4n96iH7qwpMMnvIO1BEdnbC38CokXIn9y9lSR'
 # TODO: We need to fig out these values... hmm
-MUTATION_PERC = 0.3
+MUTATION_PERC = 0.2
 MUTATION_RANGE = 1
-POPULATION_SIZE = 7
-MATE_POOL_SIZE = 3
-MAX_GEN = 10
+POPULATION_SIZE = 4
+MATE_POOL_SIZE = 2
+MAX_GEN = 4
 initial_chromosome = []
 ctr = 0
 
@@ -44,6 +44,39 @@ def cross(parent1, parent2):
     child1 = np.concatenate((parent1[:point], parent2[point:]), axis=0)
     child2 = np.concatenate((parent2[:point], parent1[point:]), axis=0)
     return child1, child2
+
+
+def get_optimal_combinations(selected_population, selected_fitness):
+    optimal_combinations = []
+    n = np.shape(selected_population)[0]
+    for i in range(n):
+        for j in range(n):
+            if i < j:
+                optimal_combinations.append([selected_fitness[i] + selected_fitness[j], i, j])
+    optimal_combinations = np.array(optimal_combinations)
+    optimal_combinations = optimal_combinations[optimal_combinations[:,0].argsort()]
+    return optimal_combinations
+
+
+def optimal_breed(selected_population, selected_fitness):
+    children = []
+    mating_combinations = get_optimal_combinations(selected_population, selected_fitness)
+    num = -1
+    while len(children) < (POPULATION_SIZE - MATE_POOL_SIZE):
+        num += 1
+        par_num1 = int(mating_combinations[num % (np.shape(mating_combinations)[0])][1])
+        par_num2 = int(mating_combinations[num % (np.shape(mating_combinations)[0])][2])
+        child1, child2 = cross(
+            selected_population[par_num1], selected_population[par_num2])
+        if not isIn(child1, children):
+            children.append(child1)
+        if len(children) == POPULATION_SIZE-MATE_POOL_SIZE:
+            break
+        if not isIn(child2, children):
+            children.append(child2)
+        if len(children) == POPULATION_SIZE-MATE_POOL_SIZE:
+            break
+    return mutate_children(np.array(children))   
 
 
 def breed(selected_population):
@@ -95,7 +128,8 @@ for gen in range(MAX_GEN+1):
     fitness = fitness[:POPULATION_SIZE]
     selected_population = population[: MATE_POOL_SIZE]
     selected_fitness = fitness[: MATE_POOL_SIZE]
-    children = breed(selected_population)
+    children = optimal_breed(selected_population, selected_fitness)
+    #children = breed(selected_population)
     children_fitness = get_fitness(children)
     population = np.concatenate((population, children), axis=0)
     fitness = np.concatenate((fitness, children_fitness), axis=0)
