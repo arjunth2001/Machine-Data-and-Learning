@@ -4,10 +4,10 @@ import json
 SECRET = 'z60uCu1jsJeEi4n96iH7qwpMMnvIO1BEdnbC38CokXIn9y9lSR'
 MUTATION_SIZE = 5
 MUTATION_RANGE = 1
-POPULATION_SIZE = 30
+POPULATION_SIZE = 15
 SELECT_TOP_PARENTS = 2
 MATE_POOL_SIZE = 5
-MAX_GEN = 17
+MAX_GEN = 8
 FACTOR = 1.5
 initial_chromosome = []
 minVal = None
@@ -163,7 +163,7 @@ def get_init(chromosome):
     temp = np.array(temp)
     temp = mutate_children(temp)
     for i in range(np.shape(temp)[0]):
-        factor = np.random.uniform(-0.05, 0.05)
+        factor = np.random.uniform(-0.0005, 0.0005)
         temp[i][0] += factor
     temp[0] = chromosome
     return temp
@@ -182,11 +182,13 @@ parent_fitness = parent_fitness[POPULATION_SIZE-MATE_POOL_SIZE:]
 
 for gen in range(MAX_GEN+1):
     if gen == 8:
-        TRAIN_FACTOR = 1
+        FACTOR = 1
         MUTATION_SIZE = 3
-        SELECT_TOP_PARENTS = 4
-    if gen % 3 == 0 and gen != 0:
-        MATE_POOL_SIZE += 1
+        SELECT_TOP_PARENTS = 3
+    # if gen % 3 == 0 and gen != 0:
+        MATE_POOL_SIZE += 2
+    if gen == 17:
+        MATE_POOL_SIZE = 15
     parent_index = np.argsort(-1*parent_fitness)
     parents = parents[parent_index]
     parent_fitness = parent_fitness[parent_index]
@@ -206,15 +208,26 @@ for gen in range(MAX_GEN+1):
         f'gen: {gen} best:{np.max(pool_fitness)}')
     next_children = roulette_selective_breed(pool, pool_fitness)
     next_children_fitness = get_fitness(next_children)
+    children_sort = np.argsort(-1*next_children_fitness)
+    next_children = next_children[children_sort]
+    next_children_fitness = next_children_fitness[children_sort]
     parents = np.concatenate((parents, children))
     parent_fitness = np.concatenate((parent_fitness, children_fitness))
     parent_index = np.argsort(-1*parent_fitness)
     parents = parents[parent_index]
     parent_fitness = parent_fitness[parent_index]
-    parent_fitness = parent_fitness[:MATE_POOL_SIZE]
-    parents = parents[:MATE_POOL_SIZE]
-    parent_fitness = parent_fitness[:MATE_POOL_SIZE]
+    parent_fitness = parent_fitness[: MATE_POOL_SIZE]
+    parents = parents[: MATE_POOL_SIZE]
+    parent_fitness = parent_fitness[: MATE_POOL_SIZE]
     children = next_children
     children_fitness = next_children_fitness
-print("BEST !", minVal, minguy)
+print("Parents:")
+print(parents)
+print("Children:")
+print(children)
+print("Parent Fitness:")
+print(parent_fitness)
+print("Children Fitness")
+print(children_fitness)
+print("BEST !:", minVal, minguy)
 print(requests)
