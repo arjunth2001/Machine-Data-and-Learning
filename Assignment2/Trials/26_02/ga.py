@@ -4,7 +4,7 @@ import json
 SECRET = 'z60uCu1jsJeEi4n96iH7qwpMMnvIO1BEdnbC38CokXIn9y9lSR'
 MUTATION_SIZE = 5
 MUTATION_RANGE = 1
-POPULATION_SIZE = 30
+POPULATION_SIZE = 29
 SELECT_TOP_PARENTS = 3
 MATE_POOL_SIZE = 10
 MAX_GEN = 11
@@ -36,10 +36,10 @@ def get_fitness(chromosomes):
     print()
     print("XXXXX-----XXXXX")
     for chromosome in chromosomes:
-        # ta_answer = ta.get_errors(SECRET, list(chromosome))
+        ta_answer = ta.get_errors(SECRET, list(chromosome))
         requests += 1
-        ta_answer = [np.random.uniform(
-            10000, 1000000), np.random.uniform(10000, 100000)]
+        # ta_answer = [np.random.uniform(
+        #     10000, 1000000), np.random.uniform(10000, 100000)]
         if minVal == None:
             minVal = ta_answer
             minguy = chromosome
