@@ -25,7 +25,7 @@ def mutate_children(children, low=-MUTATION_RANGE, high=MUTATION_RANGE):
 def get_fitness(chromosomes):
     fitness = []
     for chromosome in chromosomes:
-        ta_answer = ta.get_errors(SECRET, list(chromosome))
+        #ta_answer = ta.get_errors(SECRET, list(chromosome))
         fitness.append(ta_answer[0]+ta_answer[1])
         print(
             f'train error: {ta_answer[0]}, validation error: {ta_answer[1]}')

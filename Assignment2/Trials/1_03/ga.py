@@ -5,10 +5,10 @@ SECRET = 'z60uCu1jsJeEi4n96iH7qwpMMnvIO1BEdnbC38CokXIn9y9lSR'
 MUTATION_SIZE = 5
 MUTATION_RANGE = 1
 POPULATION_SIZE = 29
-SELECT_TOP_PARENTS = 5
-SELECT_TOP_KIDS = 3
+SELECT_TOP_PARENTS = 6
+SELECT_TOP_KIDS = 4
 MATE_POOL_SIZE = 19
-MAX_GEN = 22
+MAX_GEN = 21
 FACTOR = 1
 initial_chromosome = []
 minVal = None
@@ -19,7 +19,7 @@ requests = 0
 def mutate_children(children):
     children = np.array(children)
     for i in range(len(children)):
-        noise = np.random.uniform(-0.10*children[i], 0.10*children[i])
+        noise = np.random.uniform(-0.05*children[i], 0.05*children[i])
         indices = np.random.choice(np.arange(
             children[i].size), replace=False, size=len(children[i])-MUTATION_SIZE)
         noise[indices] = 0
@@ -45,7 +45,7 @@ def get_fitness(chromosomes):
             minVal = ta_answer
             minguy = chromosome
         else:
-            if minVal[0] + (FACTOR*minVal[1]) > (FACTOR*ta_answer[1]) + ta_answer[0]:
+            if minVal[0] + (FACTOR*minVal[1]) + abs(minVal[0]-minVal[1]) > (FACTOR*ta_answer[1]) + ta_answer[0]+abs(ta_answer[0]-ta_answer[1]):
                 minVal = ta_answer
                 minguy = chromosome
         fitness.append(
@@ -171,7 +171,7 @@ parents = parents[POPULATION_SIZE-MATE_POOL_SIZE:]
 parent_fitness = parent_fitness[POPULATION_SIZE-MATE_POOL_SIZE:]
 print("---------")
 print()
-currgen = 60
+currgen = 82
 for gen in range(1, MAX_GEN+1):
     print()
     print(">>>>>>>>>")

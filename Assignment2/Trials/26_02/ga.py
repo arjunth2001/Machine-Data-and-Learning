@@ -36,7 +36,7 @@ def get_fitness(chromosomes):
     print()
     print("XXXXX-----XXXXX")
     for chromosome in chromosomes:
-        ta_answer = ta.get_errors(SECRET, list(chromosome))
+        #ta_answer = ta.get_errors(SECRET, list(chromosome))
         requests += 1
         # ta_answer = [np.random.uniform(
         #      10000, 1000000), np.random.uniform(10000, 100000)]
