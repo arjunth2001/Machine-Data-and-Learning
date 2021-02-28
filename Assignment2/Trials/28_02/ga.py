@@ -40,7 +40,7 @@ def get_fitness(chromosomes):
         #ta_answer = ta.get_errors(SECRET, list(chromosome))
         requests += 1
         ta_answer = [np.random.uniform(
-             10000, 1000000), np.random.uniform(10000, 100000)]
+            10000, 1000000), np.random.uniform(10000, 100000)]
         if minVal == None:
             minVal = ta_answer
             minguy = chromosome
@@ -152,7 +152,18 @@ if len(parents) < POPULATION_SIZE:
     new_parents = mutate_children(parents)
     parents = np.concatenate((parents, new_parents))
     parents = parents[:POPULATION_SIZE]
+answer = []
+answer_fitness = []
 parent_fitness = get_fitness(parents)
+try:
+    with open("output.txt", "r") as f:
+        answer = json.load(f)
+        answer = np.array(answer)
+        answer_fitness = get_fitness(answer)
+        print("answer loaded")
+except:
+    answer = parents[:10]
+    answer_fitness = parent_fitness[:10]
 children = parents[: POPULATION_SIZE-MATE_POOL_SIZE]
 children_fitness = parent_fitness[: POPULATION_SIZE-MATE_POOL_SIZE]
 parents = parents[POPULATION_SIZE-MATE_POOL_SIZE:]
@@ -173,7 +184,8 @@ for gen in range(1, MAX_GEN+1):
     selected_parent_fitness = parent_fitness[: SELECT_TOP_PARENTS]
     selected_kids = children[:SELECT_TOP_KIDS]
     selected_kids_fitness = children_fitness[:SELECT_TOP_KIDS]
-    rest = np.concatenate((parents[SELECT_TOP_PARENTS:], children[SELECT_TOP_KIDS:]), axis=0)
+    rest = np.concatenate(
+        (parents[SELECT_TOP_PARENTS:], children[SELECT_TOP_KIDS:]), axis=0)
     rest_fitness = np.concatenate(
         (parent_fitness[SELECT_TOP_PARENTS:], children_fitness[SELECT_TOP_KIDS:]), axis=0)
     rest_index = np.argsort(rest_fitness*-1)
@@ -204,14 +216,30 @@ for gen in range(1, MAX_GEN+1):
     parent_fitness = parent_fitness[: MATE_POOL_SIZE]
     children = next_children
     children_fitness = next_children_fitness
+    answer = np.concatenate((answer, children), axis=0)
+    answer_fitness = np.concatenate((answer_fitness, children_fitness), axis=0)
+    answer_sort = np.argsort(-1*answer_fitness)
+    answer_fitness = answer_fitness[answer_sort]
+    answer = answer[answer_sort]
+    answer = answer[:10]
+    answer_fitness = answer_fitness[:10]
     print(f'Best of Children: {children[-1]}->{children_fitness[-1]}')
 print("XXXXXXX--NEXT TIME---XXXXXX")
 print("Parents:")
 print(parents)
 print("Children:")
 print(children)
+print("Current Toppers:")
+print(answer)
+print("Their Fitness:")
+print(answer_fitness)
 print("BEST !:", minVal, minguy)
 print(requests)
 dump = np.concatenate((parents, children))
+dump_fitness = np.concatenate((parent_fitness, children_fitness))
+dump_sort = np.argsort(-1*dump_fitness)
+dump = dump[dump_sort]
 with open("store.txt", "w") as f:
     json.dump(dump.tolist(), f)
+with open("output.txt", "w") as f:
+    json.dump(answer.tolist(), f)
