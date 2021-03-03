@@ -2,16 +2,15 @@ import numpy as np
 import client as ta
 import json
 SECRET = 'z60uCu1jsJeEi4n96iH7qwpMMnvIO1BEdnbC38CokXIn9y9lSR'
-MUTATION_SIZE = 3
+MUTATION_SIZE = 5
 MUTATION_RANGE = 1
 POPULATION_SIZE = 29
 SELECT_TOP_PARENTS = 7
 SELECT_TOP_KIDS = 3
 MATE_POOL_SIZE = 19
 MAX_GEN = 22
-FACTOR = 1
-SUM_FACTOR = 1
-SUM_EXPONENT = 1
+FACTOR = 0.85
+SUM_FACTOR = 0.7
 initial_chromosome = []
 minVal = None
 minguy = None
@@ -21,7 +20,7 @@ requests = 0
 def mutate_children(children):
     children = np.array(children)
     for i in range(len(children)):
-        noise = np.random.uniform(-0.10*children[i], 0.10*children[i])
+        noise = np.random.uniform(-0.06*children[i], 0.06*children[i])
         indices = np.random.choice(np.arange(
             children[i].size), replace=False, size=len(children[i])-MUTATION_SIZE)
         noise[indices] = 0
@@ -47,11 +46,11 @@ def get_fitness(chromosomes):
             minVal = ta_answer
             minguy = chromosome
         else:
-            if ((minVal[0] + (FACTOR*minVal[1]))*SUM_FACTOR) * abs(minVal[0]-minVal[1]) > (((FACTOR*ta_answer[1]) + ta_answer[0])*SUM_FACTOR) * abs(ta_answer[0]-ta_answer[1]):
+            if ((minVal[0] + (FACTOR*minVal[1]))*SUM_FACTOR) + abs(minVal[0]-minVal[1]) > (((FACTOR*ta_answer[1]) + ta_answer[0])*SUM_FACTOR) + abs(ta_answer[0]-ta_answer[1]):
                 minVal = ta_answer
                 minguy = chromosome
         fitness.append(
-            1e32/(((ta_answer[0] + FACTOR * ta_answer[1])*SUM_FACTOR) * abs(ta_answer[0]-ta_answer[1])))
+            1e15/(((ta_answer[0] + FACTOR * ta_answer[1])*SUM_FACTOR) + abs(ta_answer[0]-ta_answer[1])))
 
         print(
             f'kid: {chromosome} train error: {ta_answer[0]}, validation error: {ta_answer[1]}')
