@@ -10,7 +10,7 @@ SELECT_TOP_KIDS = 3
 MATE_POOL_SIZE = 19
 MAX_GEN = 22
 FACTOR = 0.85
-SUM_FACTOR = 0.7
+SUM_FACTOR = 2
 initial_chromosome = []
 minVal = None
 minguy = None
@@ -20,7 +20,7 @@ requests = 0
 def mutate_children(children):
     children = np.array(children)
     for i in range(len(children)):
-        noise = np.random.uniform(-0.06*children[i], 0.06*children[i])
+        noise = np.random.uniform(-0.04*children[i], 0.04*children[i])
         indices = np.random.choice(np.arange(
             children[i].size), replace=False, size=len(children[i])-MUTATION_SIZE)
         noise[indices] = 0
@@ -172,7 +172,7 @@ parents = parents[POPULATION_SIZE-MATE_POOL_SIZE:]
 parent_fitness = parent_fitness[POPULATION_SIZE-MATE_POOL_SIZE:]
 print("---------")
 print()
-currgen = 166
+currgen = 188
 for gen in range(1, MAX_GEN+1):
     print()
     print(">>>>>>>>>")
