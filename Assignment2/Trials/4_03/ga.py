@@ -10,7 +10,7 @@ SELECT_TOP_KIDS = 3
 MATE_POOL_SIZE = 19
 MAX_GEN = 16
 FACTOR = 1
-SUM_FACTOR = 0.35
+SUM_FACTOR = 0.2
 initial_chromosome = []
 minVal = None
 minguy = None
@@ -21,6 +21,7 @@ def mutate_children(children):
     children = np.array(children)
     for i in range(len(children)):
         noise = np.random.uniform(-0.10*children[i], 0.10*children[i])
+        noise[0] = np.random.uniform(-0.01, 0.01)
         indices = np.random.choice(np.arange(
             children[i].size), replace=False, size=len(children[i])-MUTATION_SIZE)
         noise[indices] = 0
