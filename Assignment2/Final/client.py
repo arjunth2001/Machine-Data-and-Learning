@@ -48,9 +48,9 @@ def submit(id, vector):
 
 # Replace 'SECRET_KEY' with your team's secret key (Will be sent over email)
 if __name__ == "__main__":
-    topper = [1.43062955e-02, - 2.42053803e-02, - 1.50653882e-01, - 5.03268632e-01,
-              - 1.97677812e-10, - 1.48070826e-15, - 3.55008012e-02,  2.19789318e-05,
-              - 1.78520269e-06, - 1.56533931e-08, 8.68566882e-10]
+    topper = [0.00000000e+00, 1.68637441e-03, - 8.60392988e-02,  4.34588997e-11,
+              2.39160152e-01, - 1.83669770e-15,  3.87594758e-02,  2.00806220e-05,
+              - 2.06359826e-06, - 1.43892370e-08,  9.63329121e-10]
    # print(get_errors('z60uCu1jsJeEi4n96iH7qwpMMnvIO1BEdnbC38CokXIn9y9lSR', topper))
   # print(get_overfit_vector('SECRET_KEY'))
     print(submit('z60uCu1jsJeEi4n96iH7qwpMMnvIO1BEdnbC38CokXIn9y9lSR', topper))
