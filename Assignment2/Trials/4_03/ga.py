@@ -2,15 +2,15 @@ import numpy as np
 import client as ta
 import json
 SECRET = 'z60uCu1jsJeEi4n96iH7qwpMMnvIO1BEdnbC38CokXIn9y9lSR'
-MUTATION_SIZE = 5
+MUTATION_SIZE = 4
 MUTATION_RANGE = 1
 POPULATION_SIZE = 29
 SELECT_TOP_PARENTS = 7
 SELECT_TOP_KIDS = 3
 MATE_POOL_SIZE = 19
-MAX_GEN = 22
-FACTOR = 0.85
-SUM_FACTOR = 2
+MAX_GEN = 16
+FACTOR = 1
+SUM_FACTOR = 0.2
 initial_chromosome = []
 minVal = None
 minguy = None
@@ -20,7 +20,7 @@ requests = 0
 def mutate_children(children):
     children = np.array(children)
     for i in range(len(children)):
-        noise = np.random.uniform(-0.04*children[i], 0.04*children[i])
+        noise = np.random.uniform(-0.10*children[i], 0.10*children[i])
         indices = np.random.choice(np.arange(
             children[i].size), replace=False, size=len(children[i])-MUTATION_SIZE)
         noise[indices] = 0
@@ -41,7 +41,7 @@ def get_fitness(chromosomes):
         ta_answer = ta.get_errors(SECRET, list(chromosome))
         requests += 1
         # ta_answer = [np.random.uniform(
-        #     10000, 1000000), np.random.uniform(10000, 100000)]
+        # 10000, 1000000), np.random.uniform(10000, 100000)]
         if minVal == None:
             minVal = ta_answer
             minguy = chromosome
@@ -142,7 +142,7 @@ except:
     initial_chromosome = np.array([0.0, -1.45799022e-12, -2.28980078e-13,  4.62010753e-11, -1.75214813e-10, -
                                    1.83669770e-15,  8.52944060e-16,  2.29423303e-05, -2.04721003e-06, -1.59792834e-08,  9.98214034e-10])
 try:
-    with open("store.txt", "r") as store:
+    with open("output.txt", "r") as store:
         dump = json.load(store)
         parents = np.array(dump)
 except:
@@ -172,7 +172,7 @@ parents = parents[POPULATION_SIZE-MATE_POOL_SIZE:]
 parent_fitness = parent_fitness[POPULATION_SIZE-MATE_POOL_SIZE:]
 print("---------")
 print()
-currgen = 188
+currgen = 0
 for gen in range(1, MAX_GEN+1):
     print()
     print(">>>>>>>>>")
