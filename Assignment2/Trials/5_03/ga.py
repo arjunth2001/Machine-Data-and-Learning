@@ -99,6 +99,8 @@ def roulette_selective_breed(selected_population, selected_fitness):
             0], p=probability_vector)
         par_num2 = np.random.choice(np.shape(selected_population)[
             0], p=probability_vector)
+        if par_num1 == par_num2:
+            par_num2 = (par_num1 + 1) % np.shape(selected_population)[0]
         if selected_fitness[par_num1] < selected_fitness[par_num2]:
             par_num1, par_num2 = par_num2, par_num1
         child1, child2 = cross(
