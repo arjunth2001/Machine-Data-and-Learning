@@ -1,0 +1,19 @@
+First run:
+    First Best: 37778024344010.36, Rank: 92
+    Second Best: 753485412027772.6, Rank: 100
+    Third Best: 704309895463489.9, Rank: 100
+
+Second run:
+    First Best: , Rank: 
+    Second Best: , Rank: 
+    Third Best: , Rank: 
+
+Third run:
+    First Best: , Rank: 
+    Second Best: , Rank: 
+    Third Best: , Rank: 
+
+Fourth run:
+    First Best: , Rank: 
+    Second Best: , Rank: 
+    Third Best: , Rank: 
