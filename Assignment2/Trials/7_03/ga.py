@@ -10,7 +10,7 @@ SELECT_TOP_KIDS = 4
 MATE_POOL_SIZE = 14
 MAX_GEN = 10
 FACTOR = 1
-SUM_FACTOR = 1
+SUM_FACTOR = 0
 initial_chromosome = []
 minVal = None
 minguy = None
@@ -46,11 +46,11 @@ def get_fitness(chromosomes):
             minVal = ta_answer
             minguy = chromosome
         else:
-            if ((minVal[0] + (FACTOR*minVal[1]))*SUM_FACTOR) + abs(minVal[0]-minVal[1]) > (((FACTOR*ta_answer[1]) + ta_answer[0])*SUM_FACTOR) + abs(ta_answer[0]-ta_answer[1]):
+            if ((minVal[0] + (FACTOR*minVal[1]))) + abs(minVal[0]-minVal[1])*SUM_FACTOR > (((FACTOR*ta_answer[1]) + ta_answer[0])) + abs(ta_answer[0]-ta_answer[1])*SUM_FACTOR:
                 minVal = ta_answer
                 minguy = chromosome
         fitness.append(
-            1e15/(((ta_answer[0] + FACTOR * ta_answer[1])*SUM_FACTOR) + abs(ta_answer[0]-ta_answer[1])))
+            1e15/(((ta_answer[0] + FACTOR * ta_answer[1])) + abs(ta_answer[0]-ta_answer[1])*SUM_FACTOR))
 
         print(
             f'kid: {chromosome} train error: {ta_answer[0]}, validation error: {ta_answer[1]}')
