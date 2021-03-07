@@ -25,3 +25,5 @@ Sixth run:
     First Best:38200854919691.94, Rank 95
     Second Best:45124930810478.7, Rank 101
     Third Best: 40390366410248.89, Rank 97
+Seventh run:
+    First Best:
