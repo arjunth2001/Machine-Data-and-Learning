@@ -17,3 +17,11 @@ Fourth run:
     First Best: 36675470632821.92, Rank: 82
     Second Best: 50797973154538.92, Rank: 100
     Third Best: 47767465869170.766, Rank: 99
+Fifth run:
+    First Best:47767465869170, Rank 100
+    Second Best: 42032894492879.6, Rank 100
+    Third Best:43601766637357.98, Rank 101
+Sixth run:
+    First Best:38200854919691.94, Rank 95
+    Second Best:45124930810478.7, Rank 101
+    Third Best: 40390366410248.89, Rank 97
