@@ -2,15 +2,15 @@ import numpy as np
 import client as ta
 import json
 SECRET = 'z60uCu1jsJeEi4n96iH7qwpMMnvIO1BEdnbC38CokXIn9y9lSR'
-MUTATION_SIZE = 3
+MUTATION_SIZE = 4
 MUTATION_RANGE = 1
 POPULATION_SIZE = 30
 SELECT_TOP_PARENTS = 4
 SELECT_TOP_KIDS = 4
 MATE_POOL_SIZE = 14
 MAX_GEN = 10
-FACTOR = 0.8
-SUM_FACTOR = 0.1
+FACTOR = 1
+SUM_FACTOR = 2
 initial_chromosome = []
 minVal = None
 minguy = None
@@ -20,7 +20,7 @@ requests = 0
 def mutate_children(children):
     children = np.array(children)
     for i in range(len(children)):
-        noise = np.random.uniform(-0.05*children[i], 0.05*children[i])
+        noise = np.random.uniform(-0.08*children[i], 0.08*children[i])
         indices = np.random.choice(np.arange(
             children[i].size), replace=False, size=len(children[i])-MUTATION_SIZE)
         noise[indices] = 0
