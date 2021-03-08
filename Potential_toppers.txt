@@ -1,0 +1,76 @@
+*** Submission 1: 
+Rank = 80,
+MSE = 28905651954227.688
+
+Submission 2:
+Rank = 104,
+MSE = 37803711309510.12
+
+** Submission 3:
+Rank = 86,
+MSE = 32582184983039.977
+
+Submission 4:
+Rank = 105,
+MSE = 38467642684425.87
+
+Submission 5:
+Rank = 105,
+MSE = 38884550566027.11
+
+Submission 6:
+Rank = 93,
+MSE = 35923161306208.7
+
+*** Submission 7:
+Rank = 74,
+MSE = 26023655698531.945
+
+** Submission 8:
+Rank = 86,
+MSE = 32349386009994.605
+
+Submission 9:
+Rank = 94,
+MSE = 35993179509102.195
+
+Submission 10:
+Rank = 104,
+MSE = 38070478283034.16
+
+
+---------- THE LOST ONES IN SECOND LAST RUN ---------------
+
+
+Submission 3:
+Rank = 90,
+MSE = 35749679211301.39
+
+Submission 4:
+Rank = 92,
+MSE = 35939559007964.33
+
+** Submission 5:
+Rank = 86,
+MSE = 33436957264803.625
+
+Submission 6:
+Rank = 93,
+MSE = 37315803703688.64
+
+*** Submission 7:
+Rank = 72,
+MSE = 27397329238598.305
+
+** Submission 8:
+Rank = 86,
+MSE = 32192547951091.062
+
+Submission 9:
+Rank = 91,
+MSE = 35405368014255.516
+
+Submission 10:
+Rank = 90,
+MSE = 35560634162318.58
+
