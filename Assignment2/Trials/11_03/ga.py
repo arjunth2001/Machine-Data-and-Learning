@@ -2,7 +2,7 @@ import numpy as np
 import client as ta
 import json
 SECRET = 'z60uCu1jsJeEi4n96iH7qwpMMnvIO1BEdnbC38CokXIn9y9lSR'
-MUTATION_SIZE = 3
+MUTATION_SIZE = 5
 MUTATION_RANGE = 1
 POPULATION_SIZE = 30
 SELECT_TOP_PARENTS = 4
@@ -10,7 +10,7 @@ SELECT_TOP_KIDS = 3
 MATE_POOL_SIZE = 15
 MAX_GEN = 12
 FACTOR = 1
-SUM_FACTOR = 2
+SUM_FACTOR = 1
 initial_chromosome = []
 minVal = None
 minguy = None
