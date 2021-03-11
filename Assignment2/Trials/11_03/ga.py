@@ -20,7 +20,7 @@ requests = 0
 def mutate_children(children):
     children = np.array(children)
     for i in range(len(children)):
-        noise = np.random.uniform(-0.05*children[i], 0.05*children[i])
+        noise = np.random.uniform(-0.10*children[i], 0.10*children[i])
         indices = np.random.choice(np.arange(
             children[i].size), replace=False, size=len(children[i])-MUTATION_SIZE)
         noise[indices] = 0
