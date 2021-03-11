@@ -7,8 +7,8 @@ MUTATION_RANGE = 1
 POPULATION_SIZE = 30
 SELECT_TOP_PARENTS = 4
 SELECT_TOP_KIDS = 3
-MATE_POOL_SIZE = 14
-MAX_GEN = 10
+MATE_POOL_SIZE = 15
+MAX_GEN = 12
 FACTOR = 1
 SUM_FACTOR = 2
 initial_chromosome = []
@@ -38,10 +38,10 @@ def get_fitness(chromosomes):
     print()
     print("XXXXX-----XXXXX")
     for chromosome in chromosomes:
-        #ta_answer = ta.get_errors(SECRET, list(chromosome))
+        ta_answer = ta.get_errors(SECRET, list(chromosome))
         requests += 1
-        ta_answer = [np.random.uniform(
-            10000, 1000000), np.random.uniform(10000, 100000)]
+        # ta_answer = [np.random.uniform(
+        #   10000, 1000000), np.random.uniform(10000, 100000)]
         if minVal == None:
             minVal = ta_answer
             minguy = chromosome
