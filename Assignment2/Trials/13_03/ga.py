@@ -20,11 +20,11 @@ requests = 0
 def mutate_children(children):
     children = np.array(children)
     for i in range(len(children)):
-        noise = np.random.uniform(1e-15*children[i], 1.2*children[i])
+        noise = np.random.uniform(1e-15, 1.2, size=11)
         indices = np.random.choice(np.arange(
-            children[i].size), replace=False, size=MUTATION_SIZE)
-
-        children[indices] = noise[indices]
+            children[i].size), replace=False, size=len(children[i])-MUTATION_SIZE)
+        noise.put(indices, 1)
+        children[i] = children[i]*noise
     return np.clip(children, -10, 10)
 
 
@@ -41,7 +41,7 @@ def get_fitness(chromosomes):
         ta_answer = ta.get_errors(SECRET, list(chromosome))
         requests += 1
         # ta_answer = [np.random.uniform(
-        #   10000, 1000000), np.random.uniform(10000, 100000)]
+        # 10000, 1000000), np.random.uniform(10000, 100000)]
         if minVal == None:
             minVal = ta_answer
             minguy = chromosome
@@ -139,12 +139,14 @@ def get_init2(chromosome):
     chromosome = np.array(chromosome)
     temp = [chromosome
             for i in range(POPULATION_SIZE)]
+
     for i in range(len(temp)):
-        zeroes = np.array([0]*11)
+        mylist = np.array(chromosome)
         indices = np.random.choice(np.arange(
-            temp[i].size), replace=False, size=6)
-        zeroes[indices] = chromosome[indices]
-        temp[i] = zeroes
+            temp[i].size), replace=False, size=3)
+        mylist.put(indices, 0)
+        #print("ha", mylist, indices, chromosome)
+        temp[i] = mylist
     temp[0] = chromosome
     temp = np.array(temp)
     return mutate_children(temp)
@@ -196,7 +198,7 @@ parents = parents[POPULATION_SIZE-MATE_POOL_SIZE:]
 parent_fitness = parent_fitness[POPULATION_SIZE-MATE_POOL_SIZE:]
 print("---------")
 print()
-currgen = 90
+currgen = 0
 for gen in range(1, MAX_GEN+1):
     print()
     print(">>>>>>>>>")
