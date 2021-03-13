@@ -200,7 +200,7 @@ parents = parents[POPULATION_SIZE-MATE_POOL_SIZE:]
 parent_fitness = parent_fitness[POPULATION_SIZE-MATE_POOL_SIZE:]
 print("---------")
 print()
-currgen = 12
+currgen = 24
 for gen in range(1, MAX_GEN+1):
     print()
     print(">>>>>>>>>")
