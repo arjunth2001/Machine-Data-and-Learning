@@ -8,7 +8,7 @@ POPULATION_SIZE = 30
 SELECT_TOP_PARENTS = 4
 SELECT_TOP_KIDS = 3
 MATE_POOL_SIZE = 15
-MAX_GEN = 12
+MAX_GEN = 6
 FACTOR = 1
 SUM_FACTOR = 3
 initial_chromosome = []
@@ -125,7 +125,7 @@ def get_init(chromosome):
     temp = [chromosome
             for i in range(POPULATION_SIZE)]
     for i in range(len(temp)):
-        noise = np.random.normal(chromosome, 0.33 - chromosome)
+        noise = np.random.normal(chromosome, 0.04 - chromosome)
         indices = np.random.choice(np.arange(
             temp[i].size), replace=False, size=len(temp[i])-MUTATION_SIZE)
         noise[indices] = chromosome[indices]
@@ -200,7 +200,7 @@ parents = parents[POPULATION_SIZE-MATE_POOL_SIZE:]
 parent_fitness = parent_fitness[POPULATION_SIZE-MATE_POOL_SIZE:]
 print("---------")
 print()
-currgen = 36
+currgen = 0
 for gen in range(1, MAX_GEN+1):
     print()
     print(">>>>>>>>>")
