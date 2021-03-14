@@ -10,7 +10,7 @@ SELECT_TOP_KIDS = 3
 MATE_POOL_SIZE = 15
 MAX_GEN = 6
 FACTOR = 1
-SUM_FACTOR = 3
+SUM_FACTOR = 1
 initial_chromosome = []
 minVal = None
 minguy = None
@@ -200,7 +200,7 @@ parents = parents[POPULATION_SIZE-MATE_POOL_SIZE:]
 parent_fitness = parent_fitness[POPULATION_SIZE-MATE_POOL_SIZE:]
 print("---------")
 print()
-currgen = 0
+currgen = 6
 for gen in range(1, MAX_GEN+1):
     print()
     print(">>>>>>>>>")
