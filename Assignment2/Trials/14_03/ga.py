@@ -46,11 +46,11 @@ def get_fitness(chromosomes):
             minVal = ta_answer
             minguy = chromosome
         else:
-            if ((minVal[0] + (FACTOR*minVal[1]))) + abs(minVal[0]-minVal[1])*SUM_FACTOR > (((FACTOR*ta_answer[1]) + ta_answer[0])) + abs(ta_answer[0]-ta_answer[1])*SUM_FACTOR:
+            if abs(minVal[0]-minVal[1])*SUM_FACTOR > abs(ta_answer[0]-ta_answer[1])*SUM_FACTOR:
                 minVal = ta_answer
                 minguy = chromosome
         fitness.append(
-            1e15/(((ta_answer[0] + FACTOR * ta_answer[1])) + abs(ta_answer[0]-ta_answer[1])*SUM_FACTOR))
+            1e15/(abs(ta_answer[0]-ta_answer[1])*SUM_FACTOR))
 
         print(
             f'kid: {chromosome} train error: {ta_answer[0]}, validation error: {ta_answer[1]}')
@@ -200,7 +200,7 @@ parents = parents[POPULATION_SIZE-MATE_POOL_SIZE:]
 parent_fitness = parent_fitness[POPULATION_SIZE-MATE_POOL_SIZE:]
 print("---------")
 print()
-currgen = 6
+currgen = 18
 for gen in range(1, MAX_GEN+1):
     print()
     print(">>>>>>>>>")
