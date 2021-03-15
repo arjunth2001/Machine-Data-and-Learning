@@ -38,10 +38,10 @@ def get_fitness(chromosomes):
     print()
     print("XXXXX-----XXXXX")
     for chromosome in chromosomes:
-        #ta_answer = ta.get_errors(SECRET, list(chromosome))
+        ta_answer = ta.get_errors(SECRET, list(chromosome))
         requests += 1
-        ta_answer = [np.random.uniform(
-            10000, 1000000), np.random.uniform(10000, 100000)]
+        # ta_answer = [np.random.uniform(
+        # 10000, 1000000), np.random.uniform(10000, 100000)]
         if minVal == None:
             minVal = ta_answer
             minguy = chromosome
@@ -181,7 +181,7 @@ parents = parents[POPULATION_SIZE-MATE_POOL_SIZE:]
 parent_fitness = parent_fitness[POPULATION_SIZE-MATE_POOL_SIZE:]
 print("---------")
 print()
-currgen = 90
+currgen = 0
 for gen in range(1, MAX_GEN+1):
     print()
     print(">>>>>>>>>")
