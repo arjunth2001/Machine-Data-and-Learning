@@ -127,7 +127,7 @@ def get_init(chromosome):
     for i in range(len(temp)):
         noise = np.random.normal(chromosome, 0.33 - chromosome)
         indices = np.random.choice(np.arange(
-            temp[i].size), replace=False, size=np.random.randInt(6, 10))
+            temp[i].size), replace=False, size=np.random.randint(7, 10))
         noise[indices] = chromosome[indices]
         temp[i] = noise
     temp[0] = chromosome
@@ -143,7 +143,7 @@ def get_init2(chromosome):
     for i in range(len(temp)):
         mylist = np.array(chromosome)
         indices = np.random.choice(np.arange(
-            temp[i].size), replace=False, size=np.random.randInt(6, 10))
+            temp[i].size), replace=False, size=np.random.randint(6, 10))
         mylist.put(indices, 0)
         #print("ha", mylist, indices, chromosome)
         temp[i] = mylist
