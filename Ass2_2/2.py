@@ -92,10 +92,10 @@ def P(from_state, action, to_state):
             # failed
             elif mat1 == mat2:
                 p1 = 0.25
-                
+
     if pos1 == "E" and mat1 == mat2:
         # Successfully Moved
-        if((action, pos2) in [actions_to_states["E"][0:2]]  and health1 == health2 and arrow1 == arrow2):
+        if((action, pos2) in [actions_to_states["E"][0:2]] and health1 == health2 and arrow1 == arrow2):
             correction = True
             p1 = 1.0
         elif(action == "SHOOT"):  # Indiana decided to SHOOT
@@ -112,25 +112,26 @@ def P(from_state, action, to_state):
                 p1 = 0.2
             elif(health2 == health1):  # Shit nothing happened...
                 p1 = 0.8
-                
+
     if pos1 == "W" and mat1 == mat2:
         # Successfully Moved
-        if((action, pos2) in [actions_to_states["W"][0:2]]  and health1 == health2 and arrow1 == arrow2):
+        if((action, pos2) in [actions_to_states["W"][0:2]] and health1 == health2 and arrow1 == arrow2):
             correction = True
-            p1 = 1.0             
+            p1 = 1.0
         elif(action == "SHOOT"):  # Indiana decided to SHOOT
             if(arrow2 == arrow1-1):  # He shot
                 if health2 == health1-25:  # Successful
                     p1 = 0.25
                     correction = True
                 elif health2 == health1:  # Shit he missed
-                    p1 = 0.75       
+                    p1 = 0.75
 
     if isAttacked and not correction:
         return p2
     if isAttacked and correction:
         return 0
     return p1*p2
+
 
 def R(from_state, action, to_state):
     reward = 0
@@ -144,14 +145,14 @@ def R(from_state, action, to_state):
     if pos1 == "C" and mat1 == mat2:  # if in center square, mat equal
         # Successfully Moved
         if((action, pos2) in [actions_to_states["C"][0:5]] and health1 == health2 and arrow1 == arrow2):
-           reward = -5
+            reward = -5
         # failed
         elif(pos2 == "E" and action not in ["SHOOT", "HIT"] and health1 == health2 and arrow1 == arrow2):
             reward = -5
         elif(action == "SHOOT"):  # Indiana decided to SHOOT
             if(arrow2 == arrow1-1):  # He shot
                 if health2 == health1-25:  # Successful
-                    if health2 <= 0:
+                    if health2 == 0:
                         reward = 45
                     else:
                         reward = -5
@@ -160,7 +161,7 @@ def R(from_state, action, to_state):
         # Oh he is gonna shoot...
         elif(action == "HIT") and (pos2 == "C") and arrow1 == arrow2:
             if(health2 == health1-50):  # Dem he did damage
-                if health2 <= 0:
+                if health2 == 0:
                     reward = 45
                 else:
                     reward = -5
@@ -187,15 +188,15 @@ def R(from_state, action, to_state):
         elif(action == "GATHER" and mat1 != 2):
             # Successfully gathered material
             reward = -5
-                
+
     if pos1 == "E" and mat1 == mat2:
         # Successfully Moved
-        if((action, pos2) in [actions_to_states["E"][0:2]]  and health1 == health2 and arrow1 == arrow2):
+        if((action, pos2) in [actions_to_states["E"][0:2]] and health1 == health2 and arrow1 == arrow2):
             reward = -5
         elif(action == "SHOOT"):  # Indiana decided to SHOOT
             if(arrow2 == arrow1-1):  # He shot
                 if health2 == health1-25:  # Successful
-                    if health2 <= 0:
+                    if health2 == 0:
                         reward = 45
                     else:
                         reward = -5
@@ -204,25 +205,24 @@ def R(from_state, action, to_state):
         # Oh he is gonna shoot...
         elif(action == "HIT") and (pos2 == "C") and arrow1 == arrow2:
             if(health2 == health1-50):  # Dem he did damage
-                if health2 <= 0:
+                if health2 == 0:
                     reward = 45
                 else:
                     reward = -5
             elif(health2 == health1):  # Shit nothing happened...
                 reward = -5
-                
+
     if pos1 == "W" and mat1 == mat2:
         # Successfully Moved
-        if((action, pos2) in [actions_to_states["W"][0:2]]  and health1 == health2 and arrow1 == arrow2):
-            reward = -5          
+        if((action, pos2) in [actions_to_states["W"][0:2]] and health1 == health2 and arrow1 == arrow2):
+            reward = -5
         elif(action == "SHOOT"):  # Indiana decided to SHOOT
             if(arrow2 == arrow1-1):  # He shot
                 if health2 == health1-25:  # Successful
-                    if health2 <= 0:
+                    if health2 == 0:
                         reward = 45
                     else:
-                        reward = -5 
+                        reward = -5
                 elif health2 == health1:  # Shit he missed
-                    reward = -5       
+                    reward = -5
     return reward
-    
