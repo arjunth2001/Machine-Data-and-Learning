@@ -22,7 +22,8 @@ def P(from_state, action, to_state):
     pos2, mat2, arrow2, state2, health2 = to_state
     p1 = 0
     correction = False
-    isAttacked = True
+    isAttacked = False
+    isValid = False
 
     # Demon Slayer
     p2 = 0
@@ -43,97 +44,122 @@ def P(from_state, action, to_state):
         # Successfully Moved
         if((action, pos2) in [actions_to_states["C"][0:5]] and health1 == health2 and arrow1 == arrow2):
             p1 = 0.85
+            isValid = True
             correction = True
         # failed
         elif(pos2 == "E" and action not in ["SHOOT", "HIT"] and health1 == health2 and arrow1 == arrow2):
             p1 = 0.15
-        elif(action == "SHOOT"):  # Indiana decided to SHOOT
+            isValid = True
+        elif(action == "SHOOT") and pos1 == pos2:  # Indiana decided to SHOOT
             if(arrow2 == arrow1-1):  # He shot
                 if health2 == health1-25:  # Successful
                     p1 = 0.5
+                    isValid = True
                     correction = True
                 elif health2 == health1:  # Shit he missed
+                    isValid = True
                     p1 = 0.5
         # Oh he is gonna shoot...
-        elif(action == "HIT") and (pos2 == "C") and arrow1 == arrow2:
+        elif(action == "HIT") and (pos2 == pos1) and arrow1 == arrow2:
             if(health2 == health1-50):  # Dem he did damage
                 correction = True
+                isValid = True
                 p1 = 0.1
             elif(health2 == health1):  # Shit nothing happened...
+                isValid = True
                 p1 = 0.9
 
     if pos1 == "N" and health1 == health2:
         # Successfully Moved
         if((action, pos2) in [actions_to_states["N"][0:2]] and arrow1 == arrow2 and mat1 == mat2):
             correction = True
+            isValid = True
             p1 = 0.85
         # failed
         elif(pos2 == "E" and action not in ["CRAFT"] and mat2 == mat1 and arrow1 == arrow2):
             p1 = 0.15
-        elif(action == "CRAFT" and mat1 > 0 and mat2 == mat1 - 1):  # successfully crafting
+            isValid = True
+        elif(action == "CRAFT" and mat1 > 0 and mat2 == mat1 - 1 and pos1 == pos2):  # successfully crafting
             # 1 arrow crafted
             if(arrow2 == arrow1+1):
                 p1 = 0.5
                 correction = True
+                isValid = True    
             # 2 arrows crafted
             if(arrow2 == arrow1+2):
                 p1 = 0.35
                 correction = True
+                isValid = True
             # 3 arrows crafted
             if(arrow2 == arrow1+3):
                 p1 = 0.15
                 correction = True
+                isValid = True
 
     if pos1 == "S" and health1 == health2 and arrow1 == arrow2:
         # Successfully Moved
         if((action, pos2) in [actions_to_states["S"][0:2]] and mat1 == mat2):
             correction = True
+            isValid = True
             p1 = 0.85
         # failed
         elif(pos2 == "E" and action not in ["GATHER"] and mat2 == mat1):
             p1 = 0.15
-        elif(action == "GATHER" and mat1 != 2):
+            isValid = True
+        elif(action == "GATHER" and mat1 != 2 and pos1 == pos2):
             # Successfully gathered material
             if mat1 == mat2-1:
                 p1 = 0.75
                 correction = True
+                isValid = True
             # failed
             elif mat1 == mat2:
                 p1 = 0.25
+                isValid = True
 
     if pos1 == "E" and mat1 == mat2:
         # Successfully Moved
         if((action, pos2) in [actions_to_states["E"][0:2]] and health1 == health2 and arrow1 == arrow2):
             correction = True
             p1 = 1.0
-        elif(action == "SHOOT"):  # Indiana decided to SHOOT
+            isValid = True
+        elif(action == "SHOOT") and pos1 == pos2:  # Indiana decided to SHOOT
             if(arrow2 == arrow1-1):  # He shot
                 if health2 == health1-25:  # Successful
                     p1 = 0.9
                     correction = True
+                    isValid = True
                 elif health2 == health1:  # Shit he missed
                     p1 = 0.1
+                    isValid = True
         # Oh he is gonna shoot...
-        elif(action == "HIT") and (pos2 == "C") and arrow1 == arrow2:
+        elif(action == "HIT") and (pos2 == pos1) and arrow1 == arrow2:
             if(health2 == health1-50):  # Dem he did damage
                 correction = True
                 p1 = 0.2
+                isValid = True
             elif(health2 == health1):  # Shit nothing happened...
                 p1 = 0.8
+                isValid = True
 
     if pos1 == "W" and mat1 == mat2:
         # Successfully Moved
         if((action, pos2) in [actions_to_states["W"][0:2]] and health1 == health2 and arrow1 == arrow2):
             correction = True
+            isValid = True
             p1 = 1.0
-        elif(action == "SHOOT"):  # Indiana decided to SHOOT
+        elif(action == "SHOOT") and pos1 == pos2:  # Indiana decided to SHOOT
             if(arrow2 == arrow1-1):  # He shot
                 if health2 == health1-25:  # Successful
                     p1 = 0.25
+                    isValid = True
                     correction = True
                 elif health2 == health1:  # Shit he missed
                     p1 = 0.75
+                    isValid = True
 
+    if not isValid:
+        return 0
     if isAttacked and not correction:
         return p2
     if isAttacked and correction:
@@ -153,7 +179,7 @@ def R(from_state, action, to_state):
         # failed
         elif(pos2 == "E" and action not in ["SHOOT", "HIT"] and health1 == health2 and arrow1 == arrow2):
             reward = -5
-        elif(action == "SHOOT"):  # Indiana decided to SHOOT
+        elif(action == "SHOOT") and pos1 == pos2:  # Indiana decided to SHOOT
             if(arrow2 == arrow1-1):  # He shot
                 if health2 == health1-25:  # Successful
                     if health2 == 0:
@@ -163,7 +189,7 @@ def R(from_state, action, to_state):
                 elif health2 == health1:  # Shit he missed
                     reward = -5
         # Oh he is gonna shoot...
-        elif(action == "HIT") and (pos2 == "C") and arrow1 == arrow2:
+        elif(action == "HIT") and (pos2 == pos1) and arrow1 == arrow2:
             if(health2 == health1-50):  # Dem he did damage
                 if health2 == 0:
                     reward = 45
@@ -179,8 +205,14 @@ def R(from_state, action, to_state):
         # failed
         elif(pos2 == "E" and action not in ["CRAFT"] and mat2 == mat1 and arrow1 == arrow2):
             reward = -5
-        elif(action == "CRAFT" and mat1 > 0 and mat2 == mat1 - 1):  # successfully crafting
-            reward = -5
+        elif(action == "CRAFT" and mat1 > 0 and mat2 == mat1 - 1 and pos1 == pos2):  # successfully crafting
+            if(arrow2 == arrow1+1):
+                reward = -5
+            # 2 arrows crafted
+            if(arrow2 == arrow1+2):
+                reward = -5
+            if(arrow2 == arrow1+3):
+                reward = -5
 
     if pos1 == "S" and health1 == health2 and arrow1 == arrow2:
         # Successfully Moved
@@ -189,15 +221,19 @@ def R(from_state, action, to_state):
         # failed
         elif(pos2 == "E" and action not in ["GATHER"] and mat2 == mat1):
             reward = -5
-        elif(action == "GATHER" and mat1 != 2):
+        elif(action == "GATHER" and mat1 != 2 and pos2 == pos1):
             # Successfully gathered material
-            reward = -5
+            if mat1 == mat2-1:
+                reward = -5
+            # failed
+            elif mat1 == mat2:
+                reward = -5
 
     if pos1 == "E" and mat1 == mat2:
         # Successfully Moved
         if((action, pos2) in [actions_to_states["E"][0:2]] and health1 == health2 and arrow1 == arrow2):
             reward = -5
-        elif(action == "SHOOT"):  # Indiana decided to SHOOT
+        elif(action == "SHOOT") and pos1 == pos2:  # Indiana decided to SHOOT
             if(arrow2 == arrow1-1):  # He shot
                 if health2 == health1-25:  # Successful
                     if health2 == 0:
@@ -207,7 +243,7 @@ def R(from_state, action, to_state):
                 elif health2 == health1:  # Shit he missed
                     reward = -5
         # Oh he is gonna shoot...
-        elif(action == "HIT") and (pos2 == "C") and arrow1 == arrow2:
+        elif(action == "HIT") and (pos2 == pos1) and arrow1 == arrow2:
             if(health2 == health1-50):  # Dem he did damage
                 if health2 == 0:
                     reward = 45
@@ -220,7 +256,7 @@ def R(from_state, action, to_state):
         # Successfully Moved
         if((action, pos2) in [actions_to_states["W"][0:2]] and health1 == health2 and arrow1 == arrow2):
             reward = -5
-        elif(action == "SHOOT"):  # Indiana decided to SHOOT
+        elif(action == "SHOOT") and pos1 == pos2:  # Indiana decided to SHOOT
             if(arrow2 == arrow1-1):  # He shot
                 if health2 == health1-25:  # Successful
                     if health2 == 0:
@@ -256,19 +292,30 @@ while iteration_number < 1:
         for action in valid_actions:
             sum_of_all_next_state_utilities = 0
             for to_state in valid_next_states:
+                pos2, mat2, arrow2, state2, health2 = to_state
                 p = P(from_state, action, to_state)
                 r = R(from_state, action, to_state)
+                # if ((p == 1000 or p == -1000) and r != 0) or ((p != 1000 and p != -1000) and r == 0):
+                #     print (f'P={p} and R={r}')
+                #     quit()
+                # if p != 0 and r != 0:
+                #     print (f'From state:   ({pos1},{mat1},{arrow1},{state1},{health1})') 
+                #     print (f'Action:        {action}')
+                #     print (f'To state:     ({pos2},{mat2},{arrow2},{state2},{health2})') 
+                #     print(f'P={p}, R={r}')
+                #     print('-'*10)                    
                 sum_of_all_next_state_utilities += (p * (r + (Gamma * utility[pos1])))
             if max_utility == None or (max_utility != None and sum_of_all_next_state_utilities > max_utility):
                 max_utility = (sum_of_all_next_state_utilities)
                 optimal_action = action
         utility_prime[pos1] = max_utility 
-        print (f'({pos1},{mat1},{arrow1},{state1},{health1}):{optimal_action}=[{utility_prime[pos1]}]') 
+        # print (f'({pos1},{mat1},{arrow1},{state1},{health1}):{optimal_action}=[{utility_prime[pos1]}]') 
         if max_diff == None:
             max_diff = abs(utility_prime[pos1] - utility[pos1])
         else:
             max_diff = max(max_diff, abs(utility_prime[pos1] - utility[pos1]))
     utility = utility_prime.copy()
+    # print(f'Max diff is {max_diff}')
     if max_diff < Delta:
         break
     
