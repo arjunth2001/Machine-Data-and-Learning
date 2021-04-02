@@ -138,10 +138,6 @@ def R(from_state, action, to_state):
     pos1, mat1, arrow1, state1, health1 = from_state
     pos2, mat2, arrow2, state2, health2 = to_state
 
-    # Demon Slayer
-    if state1 == "R" and state2 == "D":  # He attacked?
-        return -45
-
     if pos1 == "C" and mat1 == mat2:  # if in center square, mat equal
         # Successfully Moved
         if((action, pos2) in [actions_to_states["C"][0:5]] and health1 == health2 and arrow1 == arrow2):
@@ -225,4 +221,8 @@ def R(from_state, action, to_state):
                         reward = -5
                 elif health2 == health1:  # Shit he missed
                     reward = -5
+    if reward != 0:
+        if state1 == "R" and state2 == "D":  # He attacked?
+            return -45
+
     return reward
