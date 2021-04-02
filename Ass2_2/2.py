@@ -8,13 +8,15 @@ actions_to_states = {
 states = [(pos, mat, arrow, state, health) for pos in ["W", "N", "E", "S", "C"] for mat in range(
     3) for arrow in range(4) for state in ["D", "R"] for health in range(0, 120, 25)]
 Gamma = 0.999
-Delta = 0.5
+Delta = 0.001
 utility = {
-    pos: 0 for pos in ["W", "N", "E", "S", "C"]
+    state: 0 for state in states
 }
 utility_prime = {
-    pos: 0 for pos in ["W", "N", "E", "S", "C"]
+    state: 0 for state in states
 }
+actions = ["UP", "LEFT", "DOWN", "RIGHT",
+           "STAY", "SHOOT", "HIT", "CRAFT", "GATHER"]
 
 
 def P(from_state, action, to_state):
@@ -84,7 +86,7 @@ def P(from_state, action, to_state):
             if(arrow2 == arrow1+1):
                 p1 = 0.5
                 correction = True
-                isValid = True    
+                isValid = True
             # 2 arrows crafted
             if(arrow2 == arrow1+2):
                 p1 = 0.35
@@ -270,53 +272,37 @@ def R(from_state, action, to_state):
             return -45
     return reward
 
+
 iteration_number = 0
-while iteration_number < 1:
+while True:
     iteration_number += 1
-    print (f'iteration={iteration_number}')
+    print(f'iteration={iteration_number}')
     max_diff = None
     for from_state in states:
         optimal_action = "NONE"
         pos1, mat1, arrow1, state1, health1 = from_state
         if health1 == 0:
             continue
-        valid_next_states = []
-        valid_actions = []
-        for i_state in actions_to_states[pos1]:
-            valid_actions.append(i_state[0])
-            for state in states:
-                if i_state[1] == state[0]:
-                    valid_next_states.append(state)
         max_utility = None
-        valid_actions = set(valid_actions)
-        for action in valid_actions:
+        for action in actions:
             sum_of_all_next_state_utilities = 0
-            for to_state in valid_next_states:
-                pos2, mat2, arrow2, state2, health2 = to_state
+            for to_state in states:
                 p = P(from_state, action, to_state)
                 r = R(from_state, action, to_state)
-                # if ((p == 1000 or p == -1000) and r != 0) or ((p != 1000 and p != -1000) and r == 0):
-                #     print (f'P={p} and R={r}')
-                #     quit()
-                # if p != 0 and r != 0:
-                #     print (f'From state:   ({pos1},{mat1},{arrow1},{state1},{health1})') 
-                #     print (f'Action:        {action}')
-                #     print (f'To state:     ({pos2},{mat2},{arrow2},{state2},{health2})') 
-                #     print(f'P={p}, R={r}')
-                #     print('-'*10)                    
-                sum_of_all_next_state_utilities += (p * (r + (Gamma * utility[pos1])))
+                sum_of_all_next_state_utilities += (
+                    p * (r + (Gamma * utility[to_state])))
             if max_utility == None or (max_utility != None and sum_of_all_next_state_utilities > max_utility):
                 max_utility = (sum_of_all_next_state_utilities)
                 optimal_action = action
-        utility_prime[pos1] = max_utility 
-        # print (f'({pos1},{mat1},{arrow1},{state1},{health1}):{optimal_action}=[{utility_prime[pos1]}]') 
+        utility_prime[from_state] = max_utility
+        print(
+            f'({pos1},{mat1},{arrow1},{state1},{health1}):{optimal_action}=[{utility_prime[from_state]}]')
         if max_diff == None:
-            max_diff = abs(utility_prime[pos1] - utility[pos1])
+            max_diff = abs(utility_prime[from_state] - utility[from_state])
         else:
-            max_diff = max(max_diff, abs(utility_prime[pos1] - utility[pos1]))
+            max_diff = max(max_diff, abs(
+                utility_prime[from_state] - utility[from_state]))
     utility = utility_prime.copy()
     # print(f'Max diff is {max_diff}')
     if max_diff < Delta:
         break
-    
-                
