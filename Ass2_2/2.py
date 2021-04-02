@@ -7,6 +7,14 @@ actions_to_states = {
 }
 states = [(pos, mat, arrow, state, health) for pos in ["W", "N", "E", "S", "C"] for mat in range(
     3) for arrow in range(4) for state in ["D", "R"] for health in range(0, 120, 25)]
+Gamma = 0.999
+Delta = 0.5
+utility = {
+    pos: 0 for pos in ["W", "N", "E", "S", "C"]
+}
+utility_prime = {
+    pos: 0 for pos in ["W", "N", "E", "S", "C"]
+}
 
 
 def P(from_state, action, to_state):
@@ -224,5 +232,44 @@ def R(from_state, action, to_state):
     if reward != 0:
         if state1 == "R" and state2 == "D":  # He attacked?
             return -45
-
     return reward
+
+iteration_number = 0
+while iteration_number < 1:
+    iteration_number += 1
+    print (f'iteration={iteration_number}')
+    max_diff = None
+    for from_state in states:
+        optimal_action = "NONE"
+        pos1, mat1, arrow1, state1, health1 = from_state
+        if health1 == 0:
+            continue
+        valid_next_states = []
+        valid_actions = []
+        for i_state in actions_to_states[pos1]:
+            valid_actions.append(i_state[0])
+            for state in states:
+                if i_state[1] == state[0]:
+                    valid_next_states.append(state)
+        max_utility = None
+        valid_actions = set(valid_actions)
+        for action in valid_actions:
+            sum_of_all_next_state_utilities = 0
+            for to_state in valid_next_states:
+                p = P(from_state, action, to_state)
+                r = R(from_state, action, to_state)
+                sum_of_all_next_state_utilities += (p * (r + (Gamma * utility[pos1])))
+            if max_utility == None or (max_utility != None and sum_of_all_next_state_utilities > max_utility):
+                max_utility = (sum_of_all_next_state_utilities)
+                optimal_action = action
+        utility_prime[pos1] = max_utility 
+        print (f'({pos1},{mat1},{arrow1},{state1},{health1}):{optimal_action}=[{utility_prime[pos1]}]') 
+        if max_diff == None:
+            max_diff = abs(utility_prime[pos1] - utility[pos1])
+        else:
+            max_diff = max(max_diff, abs(utility_prime[pos1] - utility[pos1]))
+    utility = utility_prime.copy()
+    if max_diff < Delta:
+        break
+    
+                
