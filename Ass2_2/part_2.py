@@ -1,28 +1,4 @@
-actions_to_states = {
-    "C": [("UP", "N"), ("DOWN", "S"), ("LEFT", "W"), ("RIGHT", "E"), ("STAY", "C"), ("UP", "E"), ("DOWN", "E"), ("LEFT", "E"), ("STAY", "E"), ("SHOOT", "C"), ("HIT", "C")],
-    "N": [("DOWN", "C"), ("STAY", "N"), ("DOWN", "E"), ("STAY", "E"), ("CRAFT", "N")],
-    "S": [("UP", "C"), ("STAY", "S"), ("UP", "E"), ("STAY", "E"), ("GATHER", "S")],
-    "E": [("LEFT", "C"), ("STAY", "E"), ("SHOOT", "E"), ("HIT", "E")],
-    "W": [("RIGHT", "C"), ("STAY", "W"), ("SHOOT", "W")]
-}
-states = [(pos, mat, arrow, state, health) for pos in ["W", "N", "E", "S", "C"] for mat in range(
-    3) for arrow in range(4) for state in ["D", "R"] for health in range(0, 120, 25)]
-Gamma = 0.999
-Delta = 0.001
-utility = {
-    state: 0 for state in states
-}
-utility_prime = {
-    state: 0 for state in states
-}
-policy = {
-    state: "NONE" for state in states
-}
-actions = ["UP", "LEFT", "DOWN", "RIGHT",
-           "STAY", "SHOOT", "HIT", "CRAFT", "GATHER"]
-
-
-def P(from_state, action, to_state):
+def P(from_state, action, to_state, actions_to_states):
     pos1, mat1, arrow1, state1, health1 = from_state
     pos2, mat2, arrow2, state2, health2 = to_state
     p1 = 0
@@ -172,7 +148,7 @@ def P(from_state, action, to_state):
     return p1*p2
 
 
-def R(from_state, action, to_state):
+def R(from_state, action, to_state, actions_to_states):
     reward = 0
     pos1, mat1, arrow1, state1, health1 = from_state
     pos2, mat2, arrow2, state2, health2 = to_state
@@ -276,37 +252,92 @@ def R(from_state, action, to_state):
     return reward
 
 
-iteration_number = 0
-while True:
-    iteration_number += 1
-    print(f'iteration={iteration_number}')
-    max_diff = None
-    for from_state in states:
-        optimal_action = "NONE"
-        pos1, mat1, arrow1, state1, health1 = from_state
-        if health1 == 0:
-            continue
-        max_utility = None
-        for action in actions:
-            sum_of_all_next_state_utilities = 0
-            for to_state in states:
-                p = P(from_state, action, to_state)
-                r = R(from_state, action, to_state)
-                sum_of_all_next_state_utilities += (
-                    p * (r + (Gamma * utility[to_state])))
-            if max_utility == None or (max_utility != None and sum_of_all_next_state_utilities > max_utility):
-                max_utility = (sum_of_all_next_state_utilities)
-                optimal_action = action
-        utility_prime[from_state] = max_utility
-        policy[from_state] = optimal_action
-        print(
-            f'({pos1},{mat1},{arrow1},{state1},{health1}):{optimal_action}=[{utility_prime[from_state]}]')
-        if max_diff == None:
-            max_diff = abs(utility_prime[from_state] - utility[from_state])
-        else:
-            max_diff = max(max_diff, abs(
-                utility_prime[from_state] - utility[from_state]))
-    utility = utility_prime.copy()
-    # print(f'Max diff is {max_diff}')
-    if max_diff < Delta:
-        break
+def Indiana_Jones(task):
+    actions_to_states = {
+        "C": [("UP", "N"), ("DOWN", "S"), ("LEFT", "W"), ("RIGHT", "E"), ("STAY", "C"), ("UP", "E"), ("DOWN", "E"), ("LEFT", "E"), ("STAY", "E"), ("SHOOT", "C"), ("HIT", "C")],
+        "N": [("DOWN", "C"), ("STAY", "N"), ("DOWN", "E"), ("STAY", "E"), ("CRAFT", "N")],
+        "S": [("UP", "C"), ("STAY", "S"), ("UP", "E"), ("STAY", "E"), ("GATHER", "S")],
+        "E": [("LEFT", "C"), ("STAY", "E"), ("SHOOT", "E"), ("HIT", "E")],
+        "W": [("RIGHT", "C"), ("STAY", "W"), ("SHOOT", "W")]
+    }
+
+    states = [(pos, mat, arrow, state, health) for pos in ["W", "N", "E", "S", "C"] for mat in range(
+        3) for arrow in range(4) for state in ["D", "R"] for health in range(0, 120, 25)]
+    Gamma = 0.999
+    Delta = 0.001
+    policy = {
+        state: "NONE" for state in states
+    }
+    actions = ["UP", "LEFT", "DOWN", "RIGHT",
+               "STAY", "SHOOT", "HIT", "CRAFT", "GATHER"]
+
+    utility = {
+        state: 0 for state in states
+    }
+
+    utility_prime = {
+        state: 0 for state in states
+    }
+
+    if task == 0:
+        f = open("outputs/part_2_trace.txt", "w")
+    else:
+        f = open(f"outputs/part_2_trace.{task}_trace.txt", "w")
+        if task == 1:
+            actions_to_states = {
+                "C": [("UP", "N"), ("DOWN", "S"), ("LEFT", "W"), ("RIGHT", "E"), ("STAY", "C"), ("UP", "E"), ("DOWN", "E"), ("LEFT", "E"), ("STAY", "E"), ("SHOOT", "C"), ("HIT", "C")],
+                "N": [("DOWN", "C"), ("STAY", "N"), ("DOWN", "E"), ("STAY", "E"), ("CRAFT", "N")],
+                "S": [("UP", "C"), ("STAY", "S"), ("UP", "E"), ("STAY", "E"), ("GATHER", "S")],
+                "E": [("LEFT", "W"), ("STAY", "E"), ("SHOOT", "E"), ("HIT", "E")],
+                "W": [("RIGHT", "C"), ("STAY", "W"), ("SHOOT", "W")]
+            }
+        if task == 3:
+            Gamma = 0.25
+    iteration_number = 0
+    while True:
+        iteration_number += 1
+        print(f'iteration={iteration_number}', file=f)
+        max_diff = None
+        for from_state in states:
+            optimal_action = "NONE"
+            pos1, mat1, arrow1, state1, health1 = from_state
+            if health1 == 0:
+                continue
+            max_utility = None
+            for action in actions:
+                sum_of_all_next_state_utilities = 0
+                for to_state in states:
+                    p = P(from_state, action, to_state, actions_to_states)
+                    r = R(from_state, action, to_state, actions_to_states)
+                    if task == 2 and action == "STAY":
+                        r = 0
+                    sum_of_all_next_state_utilities += (
+                        p * (r + (Gamma * utility[to_state])))
+                if max_utility == None or (max_utility != None and sum_of_all_next_state_utilities > max_utility):
+                    max_utility = (sum_of_all_next_state_utilities)
+                    optimal_action = action
+            utility_prime[from_state] = max_utility
+            policy[from_state] = optimal_action
+            print(
+                f'({pos1},{mat1},{arrow1},{state1},{health1}):{optimal_action}=[{utility_prime[from_state]}]', file=f)
+            if max_diff == None:
+                max_diff = abs(utility_prime[from_state] - utility[from_state])
+            else:
+                max_diff = max(max_diff, abs(
+                    utility_prime[from_state] - utility[from_state]))
+        utility = utility_prime.copy()
+        # print(f'Max diff is {max_diff}')
+        print("-"*30, file=f)
+        print("\n", file=f)
+        if max_diff < Delta:
+            break
+    f.close()
+
+
+Indiana_Jones(0)
+print("done")
+Indiana_Jones(1)
+print("done")
+Indiana_Jones(2)
+print("done")
+Indiana_Jones(3)
