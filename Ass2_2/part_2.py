@@ -1,5 +1,6 @@
 import numpy as np
 
+
 def P(from_state, action, to_state, actions_to_states):
     pos1, mat1, arrow1, state1, health1 = from_state
     pos2, mat2, arrow2, state2, health2 = to_state
@@ -25,7 +26,7 @@ def P(from_state, action, to_state, actions_to_states):
 
     if pos1 == "C" and mat1 == mat2:  # if in center square, mat equal
         # Successfully Moved
-        if((action, pos2) in [actions_to_states["C"][0:5]] and health1 == health2 and arrow1 == arrow2):
+        if((action, pos2) in actions_to_states["C"][0:5] and health1 == health2 and arrow1 == arrow2):
             p1 = 0.85
             isValid = True
             correction = True
@@ -54,7 +55,7 @@ def P(from_state, action, to_state, actions_to_states):
 
     if pos1 == "N" and health1 == health2:
         # Successfully Moved
-        if((action, pos2) in [actions_to_states["N"][0:2]] and arrow1 == arrow2 and mat1 == mat2):
+        if((action, pos2) in actions_to_states["N"][0:2] and arrow1 == arrow2 and mat1 == mat2):
             correction = True
             isValid = True
             p1 = 0.85
@@ -81,7 +82,7 @@ def P(from_state, action, to_state, actions_to_states):
 
     if pos1 == "S" and health1 == health2 and arrow1 == arrow2:
         # Successfully Moved
-        if((action, pos2) in [actions_to_states["S"][0:2]] and mat1 == mat2):
+        if((action, pos2) in actions_to_states["S"][0:2] and mat1 == mat2):
             correction = True
             isValid = True
             p1 = 0.85
@@ -102,7 +103,7 @@ def P(from_state, action, to_state, actions_to_states):
 
     if pos1 == "E" and mat1 == mat2:
         # Successfully Moved
-        if((action, pos2) in [actions_to_states["E"][0:2]] and health1 == health2 and arrow1 == arrow2):
+        if((action, pos2) in actions_to_states["E"][0:2] and health1 == health2 and arrow1 == arrow2):
             correction = True
             p1 = 1.0
             isValid = True
@@ -127,7 +128,7 @@ def P(from_state, action, to_state, actions_to_states):
 
     if pos1 == "W" and mat1 == mat2:
         # Successfully Moved
-        if((action, pos2) in [actions_to_states["W"][0:2]] and health1 == health2 and arrow1 == arrow2):
+        if((action, pos2) in actions_to_states["W"][0:2] and health1 == health2 and arrow1 == arrow2):
             correction = True
             isValid = True
             p1 = 1.0
@@ -157,7 +158,7 @@ def R(from_state, action, to_state, actions_to_states):
 
     if pos1 == "C" and mat1 == mat2:  # if in center square, mat equal
         # Successfully Moved
-        if((action, pos2) in [actions_to_states["C"][0:5]] and health1 == health2 and arrow1 == arrow2):
+        if((action, pos2) in actions_to_states["C"][0:5] and health1 == health2 and arrow1 == arrow2):
             reward = -5
         # failed
         elif(pos2 == "E" and action not in ["SHOOT", "HIT"] and health1 == health2 and arrow1 == arrow2):
@@ -183,7 +184,7 @@ def R(from_state, action, to_state, actions_to_states):
 
     if pos1 == "N" and health1 == health2:
         # Successfully Moved
-        if((action, pos2) in [actions_to_states["N"][0:2]] and arrow1 == arrow2 and mat1 == mat2):
+        if((action, pos2) in actions_to_states["N"][0:2] and arrow1 == arrow2 and mat1 == mat2):
             reward = -5
         # failed
         elif(pos2 == "E" and action not in ["CRAFT"] and mat2 == mat1 and arrow1 == arrow2):
@@ -199,7 +200,7 @@ def R(from_state, action, to_state, actions_to_states):
 
     if pos1 == "S" and health1 == health2 and arrow1 == arrow2:
         # Successfully Moved
-        if((action, pos2) in [actions_to_states["S"][0:2]] and mat1 == mat2):
+        if((action, pos2) in actions_to_states["S"][0:2] and mat1 == mat2):
             reward = -5
         # failed
         elif(pos2 == "E" and action not in ["GATHER"] and mat2 == mat1):
@@ -214,7 +215,7 @@ def R(from_state, action, to_state, actions_to_states):
 
     if pos1 == "E" and mat1 == mat2:
         # Successfully Moved
-        if((action, pos2) in [actions_to_states["E"][0:2]] and health1 == health2 and arrow1 == arrow2):
+        if((action, pos2) in actions_to_states["E"][0:2] and health1 == health2 and arrow1 == arrow2):
             reward = -5
         elif(action == "SHOOT") and pos1 == pos2:  # Indiana decided to SHOOT
             if(arrow2 == arrow1-1):  # He shot
@@ -237,7 +238,7 @@ def R(from_state, action, to_state, actions_to_states):
 
     if pos1 == "W" and mat1 == mat2:
         # Successfully Moved
-        if((action, pos2) in [actions_to_states["W"][0:2]] and health1 == health2 and arrow1 == arrow2):
+        if((action, pos2) in actions_to_states["W"][0:2] and health1 == health2 and arrow1 == arrow2):
             reward = -5
         elif(action == "SHOOT") and pos1 == pos2:  # Indiana decided to SHOOT
             if(arrow2 == arrow1-1):  # He shot
@@ -253,10 +254,12 @@ def R(from_state, action, to_state, actions_to_states):
             return -45
     return reward
 
+
 def action_is_successful(success_prob):
     result = np.random.uniform()
     return result < success_prob
-    
+
+
 def get_MM_next_state(current_state):
     pos1, mat1, arrow1, state1, health1 = current_state
     if state1 == "D":
@@ -267,12 +270,13 @@ def get_MM_next_state(current_state):
             state1 = "D"
     return state1
 
+
 def get_IJ_next_state(current_state, next_action):
     pos1, mat1, arrow1, mm1, health1 = current_state
     pos2, mat2, arrow2, mm2, health2 = current_state
-    
+
     mm2 = get_MM_next_state(current_state)
-    
+
     if mm1 == "R" and mm2 == "D":
         # attack happened
         if pos1 == "C" or pos1 == "E":
@@ -281,7 +285,7 @@ def get_IJ_next_state(current_state, next_action):
                 health2 += 25
             arrow2 = 0
             return pos2, mat2, arrow2, mm2, health2
-        
+
     if pos1 == "C":
         if next_action == "UP":
             if action_is_successful(0.85):
@@ -292,19 +296,19 @@ def get_IJ_next_state(current_state, next_action):
             if action_is_successful(0.85):
                 pos2 = "S"
             else:
-                pos2 = "E"            
+                pos2 = "E"
         if next_action == "LEFT":
             if action_is_successful(0.85):
                 pos2 = "W"
             else:
-                pos2 = "E"             
+                pos2 = "E"
         if next_action == "RIGHT":
-            pos2 = "E"  
+            pos2 = "E"
         if next_action == "STAY":
             if action_is_successful(0.85):
                 pos2 = "C"
             else:
-                pos2 = "E"             
+                pos2 = "E"
         if next_action == "HIT":
             if action_is_successful(0.1):
                 if health2 < 50:
@@ -316,13 +320,13 @@ def get_IJ_next_state(current_state, next_action):
             if action_is_successful(0.5):
                 if health2 > 0:
                     health2 -= 25
-        
+
     if pos1 == "N":
         if next_action == "DOWN":
             if action_is_successful(0.85):
                 pos2 = "C"
             else:
-                pos2 = "E"                           
+                pos2 = "E"
         if next_action == "STAY":
             if action_is_successful(0.85):
                 pos2 = "N"
@@ -337,7 +341,7 @@ def get_IJ_next_state(current_state, next_action):
                 arrow2 += 2
             else:
                 arrow2 += 3
-                
+
     if pos1 == "S":
         if next_action == "UP":
             if action_is_successful(0.85):
@@ -355,7 +359,7 @@ def get_IJ_next_state(current_state, next_action):
 
     if pos1 == "E":
         if next_action == "LEFT":
-            pos2 = "C"             
+            pos2 = "C"
         if next_action == "STAY":
             pos2 = "E"
         if next_action == "SHOOT":
@@ -369,35 +373,36 @@ def get_IJ_next_state(current_state, next_action):
                     health2 = 0
                 else:
                     health2 -= 50
-        
+
     if pos1 == "W":
         if next_action == "RIGHT":
-            pos2 = "C"             
+            pos2 = "C"
         if next_action == "STAY":
             pos2 = "W"
         if next_action == "SHOOT":
             arrow2 -= 1
             if action_is_successful(0.25):
                 if health2 > 0:
-                    health2 -= 25                        
-            
+                    health2 -= 25
+
     return pos2, mat2, arrow2, mm2, health2
-        
+
 
 def simulate_IJ_movement(start_state, policy):
-    
+
     current_state = start_state
     step_count = 1
     while True:
         pos1, mat1, arrow1, state1, health1 = current_state
-        print(f'Step Number: {step_count}  Current State: ({pos1},{mat1},{arrow1},{state1},{health1})')
+        print(
+            f'Step Number: {step_count}  Current State: ({pos1},{mat1},{arrow1},{state1},{health1})')
         print(f'Next action: {policy[current_state]}')
         if health1 == 0:
             break
         current_state = get_IJ_next_state(current_state, policy[current_state])
         step_count += 1
 
-        
+
 def Indiana_Jones(task):
     actions_to_states = {
         "C": [("UP", "N"), ("DOWN", "S"), ("LEFT", "W"), ("RIGHT", "E"), ("STAY", "C"), ("UP", "E"), ("DOWN", "E"), ("LEFT", "E"), ("STAY", "E"), ("SHOOT", "C"), ("HIT", "C")],
@@ -456,18 +461,22 @@ def Indiana_Jones(task):
             valid_actions = set(valid_actions)
             for action in valid_actions:
                 sum_of_all_next_state_utilities = 0
+                isValid = False
                 for to_state in states:
                     p = P(from_state, action, to_state, actions_to_states)
                     r = R(from_state, action, to_state, actions_to_states)
-                    # if pos1 == "W" and action == "UP":
-                    #     print(f'P={p} and R={r}')
+                    if(p != 0):
+                        isValid = True
+                        # if pos1 == "W" and action == "UP":
+                        #     print(f'P={p} and R={r}')
                     if task == 2 and action == "STAY":
                         r = 0
                     sum_of_all_next_state_utilities += (
                         p * (r + (Gamma * utility[to_state])))
-                if max_utility == None or (max_utility != None and sum_of_all_next_state_utilities > max_utility):
-                    max_utility = (sum_of_all_next_state_utilities)
-                    optimal_action = action
+                if isValid:
+                    if max_utility == None or (max_utility != None and sum_of_all_next_state_utilities > max_utility):
+                        max_utility = (sum_of_all_next_state_utilities)
+                        optimal_action = action
             utility_prime[from_state] = max_utility
             policy[from_state] = optimal_action
             print(
@@ -485,7 +494,7 @@ def Indiana_Jones(task):
             break
     f.close()
     if task == 0:
-        simulate_IJ_movement(("W", 0, 0, "D", 100), policy)
+        simulate_IJ_movement(("C", 2, 0, "R", 100), policy)
 
 
 Indiana_Jones(0)
