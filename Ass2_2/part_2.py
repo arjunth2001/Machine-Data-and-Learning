@@ -1,3 +1,5 @@
+import numpy as np
+
 def P(from_state, action, to_state, actions_to_states):
     pos1, mat1, arrow1, state1, health1 = from_state
     pos2, mat2, arrow2, state2, health2 = to_state
@@ -251,7 +253,151 @@ def R(from_state, action, to_state, actions_to_states):
             return -45
     return reward
 
+def action_is_successful(success_prob):
+    result = np.random.uniform()
+    return result < success_prob
+    
+def get_MM_next_state(current_state):
+    pos1, mat1, arrow1, state1, health1 = current_state
+    if state1 == "D":
+        if action_is_successful(0.2):
+            state1 = "R"
+    else:
+        if action_is_successful(0.5):
+            state1 = "D"
+    return state1
 
+def get_IJ_next_state(current_state, next_action):
+    pos1, mat1, arrow1, mm1, health1 = current_state
+    pos2, mat2, arrow2, mm2, health2 = current_state
+    
+    mm2 = get_MM_next_state(current_state)
+    
+    if mm1 == "R" and mm2 == "D":
+        # attack happened
+        if pos1 == "C" or pos1 == "E":
+            # attack affected IJ
+            if health2 < 100:
+                health2 += 25
+            arrow2 = 0
+            return pos2, mat2, arrow2, mm2, health2
+        
+    if pos1 == "C":
+        if next_action == "UP":
+            if action_is_successful(0.85):
+                pos2 = "N"
+            else:
+                pos2 = "E"
+        if next_action == "DOWN":
+            if action_is_successful(0.85):
+                pos2 = "S"
+            else:
+                pos2 = "E"            
+        if next_action == "LEFT":
+            if action_is_successful(0.85):
+                pos2 = "W"
+            else:
+                pos2 = "E"             
+        if next_action == "RIGHT":
+            pos2 = "E"  
+        if next_action == "STAY":
+            if action_is_successful(0.85):
+                pos2 = "C"
+            else:
+                pos2 = "E"             
+        if next_action == "HIT":
+            if action_is_successful(0.1):
+                if health2 < 50:
+                    health2 = 0
+                else:
+                    health2 -= 50
+        if next_action == "SHOOT":
+            arrow2 -= 1
+            if action_is_successful(0.5):
+                if health2 > 0:
+                    health2 -= 25
+        
+    if pos1 == "N":
+        if next_action == "DOWN":
+            if action_is_successful(0.85):
+                pos2 = "C"
+            else:
+                pos2 = "E"                           
+        if next_action == "STAY":
+            if action_is_successful(0.85):
+                pos2 = "N"
+            else:
+                pos2 = "E"
+        if next_action == "CRAFT":
+            mat2 -= 1
+            prob_arrows = np.random.uniform()
+            if prob_arrows < 0.5:
+                arrow2 += 1
+            elif prob_arrows < 0.85:
+                arrow2 += 2
+            else:
+                arrow2 += 3
+                
+    if pos1 == "S":
+        if next_action == "UP":
+            if action_is_successful(0.85):
+                pos2 = "C"
+            else:
+                pos2 = "E"
+        if next_action == "STAY":
+            if action_is_successful(0.85):
+                pos2 = "S"
+            else:
+                pos2 = "E"
+        if next_action == "GATHER":
+            if action_is_successful(0.75):
+                mat2 += 1
+
+    if pos1 == "E":
+        if next_action == "LEFT":
+            pos2 = "C"             
+        if next_action == "STAY":
+            pos2 = "E"
+        if next_action == "SHOOT":
+            arrow2 -= 1
+            if action_is_successful(0.9):
+                if health2 > 0:
+                    health2 -= 25
+        if next_action == "HIT":
+            if action_is_successful(0.2):
+                if health2 < 50:
+                    health2 = 0
+                else:
+                    health2 -= 50
+        
+    if pos1 == "W":
+        if next_action == "RIGHT":
+            pos2 = "C"             
+        if next_action == "STAY":
+            pos2 = "W"
+        if next_action == "SHOOT":
+            arrow2 -= 1
+            if action_is_successful(0.25):
+                if health2 > 0:
+                    health2 -= 25                        
+            
+    return pos2, mat2, arrow2, mm2, health2
+        
+
+def simulate_IJ_movement(start_state, policy):
+    
+    current_state = start_state
+    step_count = 1
+    while True:
+        pos1, mat1, arrow1, state1, health1 = current_state
+        print(f'Step Number: {step_count}  Current State: ({pos1},{mat1},{arrow1},{state1},{health1})')
+        print(f'Next action: {policy[current_state]}')
+        if health1 == 0:
+            break
+        current_state = get_IJ_next_state(current_state, policy[current_state])
+        step_count += 1
+
+        
 def Indiana_Jones(task):
     actions_to_states = {
         "C": [("UP", "N"), ("DOWN", "S"), ("LEFT", "W"), ("RIGHT", "E"), ("STAY", "C"), ("UP", "E"), ("DOWN", "E"), ("LEFT", "E"), ("STAY", "E"), ("SHOOT", "C"), ("HIT", "C")],
@@ -304,11 +450,17 @@ def Indiana_Jones(task):
             if health1 == 0:
                 continue
             max_utility = None
-            for action in actions:
+            valid_actions = []
+            for i_state in actions_to_states[pos1]:
+                valid_actions.append(i_state[0])
+            valid_actions = set(valid_actions)
+            for action in valid_actions:
                 sum_of_all_next_state_utilities = 0
                 for to_state in states:
                     p = P(from_state, action, to_state, actions_to_states)
                     r = R(from_state, action, to_state, actions_to_states)
+                    # if pos1 == "W" and action == "UP":
+                    #     print(f'P={p} and R={r}')
                     if task == 2 and action == "STAY":
                         r = 0
                     sum_of_all_next_state_utilities += (
@@ -332,12 +484,14 @@ def Indiana_Jones(task):
         if max_diff < Delta:
             break
     f.close()
+    if task == 0:
+        simulate_IJ_movement(("W", 0, 0, "D", 100), policy)
 
 
 Indiana_Jones(0)
 print("done")
-Indiana_Jones(1)
-print("done")
-Indiana_Jones(2)
-print("done")
-Indiana_Jones(3)
+# Indiana_Jones(1)
+# print("done")
+# Indiana_Jones(2)
+# print("done")
+# Indiana_Jones(3)
