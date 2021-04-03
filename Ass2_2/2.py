@@ -15,6 +15,9 @@ utility = {
 utility_prime = {
     state: 0 for state in states
 }
+policy = {
+    state: "NONE" for state in states
+}
 actions = ["UP", "LEFT", "DOWN", "RIGHT",
            "STAY", "SHOOT", "HIT", "CRAFT", "GATHER"]
 
@@ -295,6 +298,7 @@ while True:
                 max_utility = (sum_of_all_next_state_utilities)
                 optimal_action = action
         utility_prime[from_state] = max_utility
+        policy[from_state] = optimal_action
         print(
             f'({pos1},{mat1},{arrow1},{state1},{health1}):{optimal_action}=[{utility_prime[from_state]}]')
         if max_diff == None:
