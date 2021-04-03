@@ -388,22 +388,21 @@ def get_IJ_next_state(current_state, next_action):
     return pos2, mat2, arrow2, mm2, health2
 
 
-def simulate_IJ_movement(start_state, policy):
+def simulate_IJ_movement(start_state, policy, f2):
 
     current_state = start_state
     step_count = 1
     while True:
         pos1, mat1, arrow1, state1, health1 = current_state
         print(
-            f'Step Number: {step_count}  Current State: ({pos1},{mat1},{arrow1},{state1},{health1})')
-        print(f'Next action: {policy[current_state]}')
+            f'Step Number: {step_count}  Current State: ({pos1},{mat1},{arrow1},{state1},{health1})  Taking Action: {policy[current_state]}', file=f2)
         if health1 == 0:
             break
         current_state = get_IJ_next_state(current_state, policy[current_state])
         step_count += 1
 
 
-def Indiana_Jones(task):
+def Indiana_Jones(task, start_state_num):
     actions_to_states = {
         "C": [("UP", "N"), ("DOWN", "S"), ("LEFT", "W"), ("RIGHT", "E"), ("STAY", "C"), ("UP", "E"), ("DOWN", "E"), ("LEFT", "E"), ("STAY", "E"), ("SHOOT", "C"), ("HIT", "C")],
         "N": [("DOWN", "C"), ("STAY", "N"), ("DOWN", "E"), ("STAY", "E"), ("CRAFT", "N")],
@@ -494,13 +493,21 @@ def Indiana_Jones(task):
             break
     f.close()
     if task == 0:
-        simulate_IJ_movement(("C", 2, 0, "R", 100), policy)
+        if start_state_num == 2:
+            f2 = open("outputs/part_2_simulation_state_2.txt", "w")
+            simulate_IJ_movement(("C", 2, 0, "R", 100), policy, f2)
+        elif start_state_num == 1:
+            f2 = open("outputs/part_2_simulation_state_1.txt", "w")
+            simulate_IJ_movement(("W", 0, 0, "D", 100), policy, f2)            
+        f2.close()
 
 
-Indiana_Jones(0)
+Indiana_Jones(0, 1)
 print("done")
-# Indiana_Jones(1)
-# print("done")
-# Indiana_Jones(2)
-# print("done")
-# Indiana_Jones(3)
+Indiana_Jones(0, 2)
+print("done")
+Indiana_Jones(1, 0)
+print("done")
+Indiana_Jones(2, 0)
+print("done")
+Indiana_Jones(3, 0)
