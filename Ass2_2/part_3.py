@@ -272,29 +272,19 @@ def build_possible_actions(states, actions_to_states):
 
 def construct_A(possible_actions, states, actions_to_states):
     A = []
-    for state in states:
+    for to_state in states:
         temp = []
-        for from_state in states:       # visting all states
-            # all possible actions that can be taken from currently visiting state
-            for action in possible_actions[from_state]:
-                for to_state in states:
-                    p = P(from_state, action, to_state, actions_to_states)
-                    if p != 0:
-                        if from_state != state and to_state != state:
-                            temp.append(0)
-                        if from_state == state and to_state != state:
-                            temp.append(p)
-                        if from_state != state and to_state == state:
-                            temp.append(-p)
-                        if from_state == state and to_state == state:
-                            continue
-
-                        temp.append(1)
-        A.append(temp)
-        print(temp.count(1), temp.count(2))
-        print(len(temp))
-        print(state[0])
-        # quit()
+        for from_state in states:
+            for action in possible_actions[from_state]:    
+                p = P(from_state, action, to_state, actions_to_states)
+                if p != 0:
+                    if from_state == to_state:
+                        temp.append(1-p)
+                    else:
+                        temp.append(-p)
+                elif from_state[-1] == 0:
+                    temp.append(1)
+        A.append(temp)             
     return np.array(A)
 
 
