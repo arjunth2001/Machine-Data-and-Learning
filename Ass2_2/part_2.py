@@ -1,4 +1,5 @@
 import numpy as np
+import os
 
 
 def P(from_state, action, to_state, actions_to_states):
@@ -498,10 +499,12 @@ def Indiana_Jones(task, start_state_num):
             simulate_IJ_movement(("C", 2, 0, "R", 100), policy, f2)
         elif start_state_num == 1:
             f2 = open("outputs/part_2_simulation_state_1.txt", "w")
-            simulate_IJ_movement(("W", 0, 0, "D", 100), policy, f2)            
+            simulate_IJ_movement(("W", 0, 0, "D", 100), policy, f2)
         f2.close()
 
 
+if not os.path.exists("./outputs"):
+    os.mkdir("outputs")
 Indiana_Jones(0, 1)
 print("done")
 Indiana_Jones(0, 2)

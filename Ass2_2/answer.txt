@@ -1,3 +1,0 @@
-Step Number: 1  Current State: (W,0,0,D,100)
-Next action: SHOOT
-Step Number: 2  Current State: (W,0,-1,R,100)
