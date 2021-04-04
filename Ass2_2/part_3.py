@@ -144,7 +144,8 @@ def P(from_state, action, to_state, actions_to_states):
                 elif health2 == health1:  # Shit he missed
                     p1 = 0.75
                     isValid = True
-
+    if action == "NONE" and from_state == to_state and health1 == 0:
+        return 1
     if not isValid:
         return 0
     if isAttacked and not correction:
@@ -169,19 +170,13 @@ def R(from_state, action, to_state, actions_to_states):
         elif(action == "SHOOT") and pos1 == pos2:  # Indiana decided to SHOOT
             if(arrow2 == arrow1-1):  # He shot
                 if health2 == health1-25:  # Successful
-                    if health2 == 0:
-                        reward = 45
-                    else:
-                        reward = -5
+                    reward = -5
                 elif health2 == health1:  # Shit he missed
                     reward = -5
         # Oh he is gonna shoot...
         elif(action == "HIT") and (pos2 == pos1) and arrow1 == arrow2:
             if(health2 == health1-50):  # Dem he did damage
-                if health2 == 0:
-                    reward = 45
-                else:
-                    reward = -5
+                reward = -5
             elif(health2 == health1):  # Shit nothing happened...
                 reward = -5
 
@@ -223,19 +218,13 @@ def R(from_state, action, to_state, actions_to_states):
         elif(action == "SHOOT") and pos1 == pos2:  # Indiana decided to SHOOT
             if(arrow2 == arrow1-1):  # He shot
                 if health2 == health1-25:  # Successful
-                    if health2 == 0:
-                        reward = 45
-                    else:
-                        reward = -5
+                    reward = -5
                 elif health2 == health1:  # Shit he missed
                     reward = -5
         # Oh he is gonna shoot...
         elif(action == "HIT") and (pos2 == pos1) and arrow1 == arrow2:
             if(health2 == health1-50):  # Dem he did damage
-                if health2 == 0:
-                    reward = 45
-                else:
-                    reward = -5
+                reward = -5
             elif(health2 == health1):  # Shit nothing happened...
                 reward = -5
 
@@ -246,10 +235,7 @@ def R(from_state, action, to_state, actions_to_states):
         elif(action == "SHOOT") and pos1 == pos2:  # Indiana decided to SHOOT
             if(arrow2 == arrow1-1):  # He shot
                 if health2 == health1-25:  # Successful
-                    if health2 == 0:
-                        reward = 45
-                    else:
-                        reward = -5
+                    reward = -5
                 elif health2 == health1:  # Shit he missed
                     reward = -5
     if reward != 0:
@@ -283,6 +269,68 @@ def build_possible_actions(states, actions_to_states):
     return possible_actions, total_actions
 
 
+def construct_A(possible_actions, states, actions_to_states):
+    A = []
+    for state in states:
+        temp = []
+        for from_state in states:       # visting all states
+            for action in possible_actions[from_state]:     # all possible actions that can be taken from currently visiting state
+                for to_state in states:
+                    p = P(from_state, action, to_state, actions_to_states)
+                    if p != 0 and p != 1:
+                        if from_state != state and to_state != state:
+                            temp.append(0)
+                        else:
+                            if from_state == state and to_state == state:
+                                continue
+                            if from_state == state and to_state != state:
+                                temp.append(p)
+                            if from_state != state and to_state == state:
+                                temp.append(-p)
+                    elif p == 1:
+                        if from_state == state and to_state == state:
+                           temp.append(1)
+        A.append(temp)  
+    return np.array(A)
+
+
+def construct_R(possible_actions, states, actions_to_states):
+    Reward = []
+    for state in states:
+        for action in possible_actions[state]:
+            R_s_a = 0
+            for to_state in states:
+                p = P(from_state, action, to_state, actions_to_states)
+                r = R(from_state, action, to_state, actions_to_states)
+                R_s_a += (p*r)
+            Reward.append(R_s_a)             
+    return np.array(Reward)
+
+
+def get_optimal_policy(x):
+    policy = []
+    x_index = 0
+    for i in range(len(states)):
+        state = states[i]
+        max_x_value_for_current_state = None
+        best_action_for_current_state = None
+        for j in range(len(possible_actions[state])):
+            action = possible_actions[state][j]
+            if max_x_value_for_current_state == None or (max_x_value_for_current_state != None and x[x_index] > max_x_value_for_current_state):
+                max_x_value_for_current_state = x[x_index]
+                best_action_for_current_state = action
+            x_index += 1
+        policy.append([state, best_action_for_current_state])
+    return policy
+
+
+def construct_alpha():
+    alpha = [0 for pos in ["W", "N", "E", "S", "C"] for mat in range(
+        3) for arrow in range(4) for state in ["D", "R"] for health in range(0, 120, 25)]
+    alpha[-1] = 1
+    return np.expand_dims(np.array(alpha), axis=1)
+
+
 def LP():
     actions_to_states = {
         "C": [("UP", "N"), ("DOWN", "S"), ("LEFT", "W"), ("RIGHT", "E"), ("STAY", "C"), ("UP", "E"), ("DOWN", "E"), ("LEFT", "E"), ("STAY", "E"), ("SHOOT", "C"), ("HIT", "C")],
@@ -297,17 +345,26 @@ def LP():
     actions = ["UP", "LEFT", "DOWN", "RIGHT",
                "STAY", "SHOOT", "HIT", "CRAFT", "GATHER", "NONE"]
     possible_actions, total_actions = build_possible_actions(states, actions)
-    A = []
-    alpha = []
-    R = []
+    A = construct_A(possible_actions, states, actions_to_states)
+    alpha = construct_alpha()
+    Reward = construct_R(possible_actions, states, actions_to_states)
     x = cp.Variable(shape=(total_actions, 1), name='x')
     constraints = [cp.matmul(A, x) == alpha, x >= 0]
-    objective = cp.Maximize(cp.matmul(R, x))
+    objective = cp.Maximize(cp.matmul(Reward, x))
     problem = cp.Problem(objective, constraints)
     objective = problem.solve()
     x = x.value.reshape(len(x.value))
-
-
+    optimal_policy = get_optimal_policy(x)
+    final_output = {
+        "a": A.tolist(),
+        "r": Reward.tolist(),
+        "alpha": alpha.tolist(),
+        "x": x.tolist(),
+        "policy": optimal_policy,
+        "objective": objective  
+    }
+    with open("./outputs/part_3_output.json", "w") as f:
+        json.dump(final_output, f)
 if not os.path.exists("./outputs"):
     os.mkdir("outputs")
 LP()
