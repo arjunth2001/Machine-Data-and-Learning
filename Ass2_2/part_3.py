@@ -1,0 +1,313 @@
+import numpy as np
+import cvxpy as cp
+import os
+import json
+
+
+def P(from_state, action, to_state, actions_to_states):
+    pos1, mat1, arrow1, state1, health1 = from_state
+    pos2, mat2, arrow2, state2, health2 = to_state
+    p1 = 0
+    correction = False
+    isAttacked = False
+    isValid = False
+
+    # Demon Slayer
+    p2 = 0
+    if(state1 == "D" and state2 == "D"):  # He is lazy
+        p2 = 0.8
+    elif(state1 == "D" and state2 == "R"):  # He will attack soon
+        p2 = 0.2
+    # He didn't attack.. Lmao
+    elif(state1 == "R" and state2 == "R"):
+        p2 = 0.5
+    else:  # He attacked?
+        p2 = 0.5
+        # SHit he successfully did it...
+        if(health2 == health1+25 and (pos1 == "C" or pos1 == "E") and arrow2 == 0):
+            isAttacked = True
+
+    if pos1 == "C" and mat1 == mat2:  # if in center square, mat equal
+        # Successfully Moved
+        if((action, pos2) in actions_to_states["C"][0:5] and health1 == health2 and arrow1 == arrow2):
+            p1 = 0.85
+            isValid = True
+            correction = True
+        # failed
+        elif(pos2 == "E" and action not in ["SHOOT", "HIT"] and health1 == health2 and arrow1 == arrow2):
+            p1 = 0.15
+            isValid = True
+        elif(action == "SHOOT") and pos1 == pos2:  # Indiana decided to SHOOT
+            if(arrow2 == arrow1-1):  # He shot
+                if health2 == health1-25:  # Successful
+                    p1 = 0.5
+                    isValid = True
+                    correction = True
+                elif health2 == health1:  # Shit he missed
+                    isValid = True
+                    p1 = 0.5
+        # Oh he is gonna shoot...
+        elif(action == "HIT") and (pos2 == pos1) and arrow1 == arrow2:
+            if(health2 == health1-50):  # Dem he did damage
+                correction = True
+                isValid = True
+                p1 = 0.1
+            elif(health2 == health1):  # Shit nothing happened...
+                isValid = True
+                p1 = 0.9
+
+    if pos1 == "N" and health1 == health2:
+        # Successfully Moved
+        if((action, pos2) in actions_to_states["N"][0:2] and arrow1 == arrow2 and mat1 == mat2):
+            correction = True
+            isValid = True
+            p1 = 0.85
+        # failed
+        elif(pos2 == "E" and action not in ["CRAFT"] and mat2 == mat1 and arrow1 == arrow2):
+            p1 = 0.15
+            isValid = True
+        elif(action == "CRAFT" and mat1 > 0 and mat2 == mat1 - 1 and pos1 == pos2):  # successfully crafting
+            # 1 arrow crafted
+            if(arrow2 == arrow1+1):
+                p1 = 0.5
+                correction = True
+                isValid = True
+            # 2 arrows crafted
+            if(arrow2 == arrow1+2):
+                p1 = 0.35
+                correction = True
+                isValid = True
+            # 3 arrows crafted
+            if(arrow2 == arrow1+3):
+                p1 = 0.15
+                correction = True
+                isValid = True
+
+    if pos1 == "S" and health1 == health2 and arrow1 == arrow2:
+        # Successfully Moved
+        if((action, pos2) in actions_to_states["S"][0:2] and mat1 == mat2):
+            correction = True
+            isValid = True
+            p1 = 0.85
+        # failed
+        elif(pos2 == "E" and action not in ["GATHER"] and mat2 == mat1):
+            p1 = 0.15
+            isValid = True
+        elif(action == "GATHER" and mat1 != 2 and pos1 == pos2):
+            # Successfully gathered material
+            if mat1 == mat2-1:
+                p1 = 0.75
+                correction = True
+                isValid = True
+            # failed
+            elif mat1 == mat2:
+                p1 = 0.25
+                isValid = True
+
+    if pos1 == "E" and mat1 == mat2:
+        # Successfully Moved
+        if((action, pos2) in actions_to_states["E"][0:2] and health1 == health2 and arrow1 == arrow2):
+            correction = True
+            p1 = 1.0
+            isValid = True
+        elif(action == "SHOOT") and pos1 == pos2:  # Indiana decided to SHOOT
+            if(arrow2 == arrow1-1):  # He shot
+                if health2 == health1-25:  # Successful
+                    p1 = 0.9
+                    correction = True
+                    isValid = True
+                elif health2 == health1:  # Shit he missed
+                    p1 = 0.1
+                    isValid = True
+        # Oh he is gonna shoot...
+        elif(action == "HIT") and (pos2 == pos1) and arrow1 == arrow2:
+            if(health2 == health1-50):  # Dem he did damage
+                correction = True
+                p1 = 0.2
+                isValid = True
+            elif(health2 == health1):  # Shit nothing happened...
+                p1 = 0.8
+                isValid = True
+
+    if pos1 == "W" and mat1 == mat2:
+        # Successfully Moved
+        if((action, pos2) in actions_to_states["W"][0:2] and health1 == health2 and arrow1 == arrow2):
+            correction = True
+            isValid = True
+            p1 = 1.0
+        elif(action == "SHOOT") and pos1 == pos2:  # Indiana decided to SHOOT
+            if(arrow2 == arrow1-1):  # He shot
+                if health2 == health1-25:  # Successful
+                    p1 = 0.25
+                    isValid = True
+                    correction = True
+                elif health2 == health1:  # Shit he missed
+                    p1 = 0.75
+                    isValid = True
+
+    if not isValid:
+        return 0
+    if isAttacked and not correction:
+        return p2
+    if isAttacked and correction:
+        return 0
+    return p1*p2
+
+
+def R(from_state, action, to_state, actions_to_states):
+    reward = 0
+    pos1, mat1, arrow1, state1, health1 = from_state
+    pos2, mat2, arrow2, state2, health2 = to_state
+
+    if pos1 == "C" and mat1 == mat2:  # if in center square, mat equal
+        # Successfully Moved
+        if((action, pos2) in actions_to_states["C"][0:5] and health1 == health2 and arrow1 == arrow2):
+            reward = -5
+        # failed
+        elif(pos2 == "E" and action not in ["SHOOT", "HIT"] and health1 == health2 and arrow1 == arrow2):
+            reward = -5
+        elif(action == "SHOOT") and pos1 == pos2:  # Indiana decided to SHOOT
+            if(arrow2 == arrow1-1):  # He shot
+                if health2 == health1-25:  # Successful
+                    if health2 == 0:
+                        reward = 45
+                    else:
+                        reward = -5
+                elif health2 == health1:  # Shit he missed
+                    reward = -5
+        # Oh he is gonna shoot...
+        elif(action == "HIT") and (pos2 == pos1) and arrow1 == arrow2:
+            if(health2 == health1-50):  # Dem he did damage
+                if health2 == 0:
+                    reward = 45
+                else:
+                    reward = -5
+            elif(health2 == health1):  # Shit nothing happened...
+                reward = -5
+
+    if pos1 == "N" and health1 == health2:
+        # Successfully Moved
+        if((action, pos2) in actions_to_states["N"][0:2] and arrow1 == arrow2 and mat1 == mat2):
+            reward = -5
+        # failed
+        elif(pos2 == "E" and action not in ["CRAFT"] and mat2 == mat1 and arrow1 == arrow2):
+            reward = -5
+        elif(action == "CRAFT" and mat1 > 0 and mat2 == mat1 - 1 and pos1 == pos2):  # successfully crafting
+            if(arrow2 == arrow1+1):
+                reward = -5
+            # 2 arrows crafted
+            if(arrow2 == arrow1+2):
+                reward = -5
+            if(arrow2 == arrow1+3):
+                reward = -5
+
+    if pos1 == "S" and health1 == health2 and arrow1 == arrow2:
+        # Successfully Moved
+        if((action, pos2) in actions_to_states["S"][0:2] and mat1 == mat2):
+            reward = -5
+        # failed
+        elif(pos2 == "E" and action not in ["GATHER"] and mat2 == mat1):
+            reward = -5
+        elif(action == "GATHER" and mat1 != 2 and pos2 == pos1):
+            # Successfully gathered material
+            if mat1 == mat2-1:
+                reward = -5
+            # failed
+            elif mat1 == mat2:
+                reward = -5
+
+    if pos1 == "E" and mat1 == mat2:
+        # Successfully Moved
+        if((action, pos2) in actions_to_states["E"][0:2] and health1 == health2 and arrow1 == arrow2):
+            reward = -5
+        elif(action == "SHOOT") and pos1 == pos2:  # Indiana decided to SHOOT
+            if(arrow2 == arrow1-1):  # He shot
+                if health2 == health1-25:  # Successful
+                    if health2 == 0:
+                        reward = 45
+                    else:
+                        reward = -5
+                elif health2 == health1:  # Shit he missed
+                    reward = -5
+        # Oh he is gonna shoot...
+        elif(action == "HIT") and (pos2 == pos1) and arrow1 == arrow2:
+            if(health2 == health1-50):  # Dem he did damage
+                if health2 == 0:
+                    reward = 45
+                else:
+                    reward = -5
+            elif(health2 == health1):  # Shit nothing happened...
+                reward = -5
+
+    if pos1 == "W" and mat1 == mat2:
+        # Successfully Moved
+        if((action, pos2) in actions_to_states["W"][0:2] and health1 == health2 and arrow1 == arrow2):
+            reward = -5
+        elif(action == "SHOOT") and pos1 == pos2:  # Indiana decided to SHOOT
+            if(arrow2 == arrow1-1):  # He shot
+                if health2 == health1-25:  # Successful
+                    if health2 == 0:
+                        reward = 45
+                    else:
+                        reward = -5
+                elif health2 == health1:  # Shit he missed
+                    reward = -5
+    if reward != 0:
+        if state1 == "R" and state2 == "D":  # He attacked?
+            return -45
+    return reward
+
+
+def build_possible_actions(states, actions_to_states):
+    possible_actions = {}
+    total_actions = 0
+    for from_state in states:
+        pos1, mat1, arrow1, state1, health1 = from_state
+        curr_actions = []
+        valid_actions = []
+        for i_state in actions_to_states[pos1]:
+            valid_actions.append(i_state[0])
+        valid_actions = set(valid_actions)
+        for action in valid_actions:
+            isValid = False
+            for to_state in states:
+                p = P(from_state, action, to_state, actions_to_states)
+                if(p != 0):
+                    isValid = True
+            if isValid:
+                curr_actions.append(action)
+        if health1 == 0:
+            curr_actions.append("NONE")
+        possible_actions[from_state] = curr_actions.sort()
+        total_actions += len(curr_actions)
+    return possible_actions, total_actions
+
+
+def LP():
+    actions_to_states = {
+        "C": [("UP", "N"), ("DOWN", "S"), ("LEFT", "W"), ("RIGHT", "E"), ("STAY", "C"), ("UP", "E"), ("DOWN", "E"), ("LEFT", "E"), ("STAY", "E"), ("SHOOT", "C"), ("HIT", "C")],
+        "N": [("DOWN", "C"), ("STAY", "N"), ("DOWN", "E"), ("STAY", "E"), ("CRAFT", "N")],
+        "S": [("UP", "C"), ("STAY", "S"), ("UP", "E"), ("STAY", "E"), ("GATHER", "S")],
+        "E": [("LEFT", "C"), ("STAY", "E"), ("SHOOT", "E"), ("HIT", "E")],
+        "W": [("RIGHT", "C"), ("STAY", "W"), ("SHOOT", "W")]
+    }
+    states = [(pos, mat, arrow, state, health) for pos in ["W", "N", "E", "S", "C"] for mat in range(
+        3) for arrow in range(4) for state in ["D", "R"] for health in range(0, 120, 25)]
+    Gamma = 0.999
+    actions = ["UP", "LEFT", "DOWN", "RIGHT",
+               "STAY", "SHOOT", "HIT", "CRAFT", "GATHER", "NONE"]
+    possible_actions, total_actions = build_possible_actions(states, actions)
+    A = []
+    alpha = []
+    R = []
+    x = cp.Variable(shape=(total_actions, 1), name='x')
+    constraints = [cp.matmul(A, x) == alpha, x >= 0]
+    objective = cp.Maximize(cp.matmul(R, x))
+    problem = cp.Problem(objective, constraints)
+    objective = problem.solve()
+    x = x.value.reshape(len(x.value))
+
+
+if not os.path.exists("./outputs"):
+    os.mkdir("outputs")
+LP()
