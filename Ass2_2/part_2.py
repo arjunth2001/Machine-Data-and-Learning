@@ -453,7 +453,7 @@ def Indiana_Jones(task, start_state_num):
             }
         if task == 3:
             Gamma = 0.25
-    iteration_number = 0
+    iteration_number = -1
     while True:
         iteration_number += 1
         print(f'iteration={iteration_number}', file=f)
@@ -463,7 +463,7 @@ def Indiana_Jones(task, start_state_num):
             pos1, mat1, arrow1, state1, health1 = from_state
             if health1 == 0:
                 print(
-                    f'({pos1},{mat1},{arrow1},{state1},{health1}):NONE=[{utility_prime[from_state]}]', file=f)
+                    f'({pos1},{mat1},{arrow1},{state1},{health1}):NONE=[{round(utility_prime[from_state],3)}]', file=f)
                 continue
             max_utility = None
             valid_actions = []
@@ -491,7 +491,7 @@ def Indiana_Jones(task, start_state_num):
             utility_prime[from_state] = max_utility
             policy[from_state] = optimal_action
             print(
-                f'({pos1},{mat1},{arrow1},{state1},{health1}):{optimal_action}=[{utility_prime[from_state]}]', file=f)
+                f'({pos1},{mat1},{arrow1},{state1},{health1}):{optimal_action}=[{round(utility_prime[from_state],3)}]', file=f)
             if max_diff == None:
                 max_diff = abs(utility_prime[from_state] - utility[from_state])
             else:
