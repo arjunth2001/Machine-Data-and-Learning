@@ -321,7 +321,7 @@ def construct_R(possible_actions, states, actions_to_states):
                 r = R(state, action, to_state, actions_to_states)
                 R_s_a += (p*r)
             Reward.append(R_s_a)
-    return np.array(Reward)[:, np.newaxis].transpose()
+    return np.array(Reward)
 
 
 def get_optimal_policy(x, states, possible_actions):
@@ -379,7 +379,7 @@ def LP():
     final_output = {
         "a": A.tolist(),
         "r": Reward.tolist(),
-        "alpha": alpha.tolist(),
+        "alpha": np.squeeze(alpha).tolist(),
         "x": x.tolist(),
         "policy": optimal_policy,
         "objective": objective
