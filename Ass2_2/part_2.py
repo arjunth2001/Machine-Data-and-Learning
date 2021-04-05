@@ -22,7 +22,7 @@ def P(from_state, action, to_state, actions_to_states):
     else:  # He attacked?
         p2 = 0.5
         # SHit he successfully did it...
-        if(health2 == health1+25 and (pos1 == "C" or pos1 == "E") and arrow2 == 0):
+        if((health2 == health1+25 or (health1 == health2 and health2 == 100)) and (pos1 == "C" or pos1 == "E") and arrow2 == 0):
             isAttacked = True
 
     if pos1 == "C" and mat1 == mat2:  # if in center square, mat equal
@@ -46,7 +46,7 @@ def P(from_state, action, to_state, actions_to_states):
                     p1 = 0.5
         # Oh he is gonna shoot...
         elif(action == "HIT") and (pos2 == pos1) and arrow1 == arrow2:
-            if(health2 == health1-50):  # Dem he did damage
+            if(health2 == health1-50 or (health2 == 0 and health1 == 25)):  # Dem he did damage
                 correction = True
                 isValid = True
                 p1 = 0.1
@@ -65,21 +65,32 @@ def P(from_state, action, to_state, actions_to_states):
             p1 = 0.15
             isValid = True
         elif(action == "CRAFT" and mat1 > 0 and mat2 == mat1 - 1 and pos1 == pos2):  # successfully crafting
-            # 1 arrow crafted
-            if(arrow2 == arrow1+1):
-                p1 = 0.5
-                correction = True
-                isValid = True
-            # 2 arrows crafted
-            if(arrow2 == arrow1+2):
-                p1 = 0.35
-                correction = True
-                isValid = True
-            # 3 arrows crafted
-            if(arrow2 == arrow1+3):
-                p1 = 0.15
-                correction = True
-                isValid = True
+            if arrow1 == 0:
+                # 1 arrow crafted
+                if(arrow2 == arrow1+1):
+                    p1 = 0.5
+                    correction = True
+                    isValid = True
+                # 2 arrows crafted
+                if(arrow2 == arrow1+2):
+                    p1 = 0.35
+                    correction = True
+                    isValid = True
+                # 3 arrows crafted
+                if(arrow2 == arrow1+3):
+                    p1 = 0.15
+                    correction = True
+                    isValid = True
+            if arrow1 == 1:
+                if arrow2 == 2 or arrow2 == 3:
+                    p1 = 0.5
+                    correction = True
+                    isValid = True
+            if arrow1 == 2:
+                if arrow2 == 3:
+                    p1 = 1
+                    correction = True
+                    isValid = True
 
     if pos1 == "S" and health1 == health2 and arrow1 == arrow2:
         # Successfully Moved
@@ -119,7 +130,7 @@ def P(from_state, action, to_state, actions_to_states):
                     isValid = True
         # Oh he is gonna shoot...
         elif(action == "HIT") and (pos2 == pos1) and arrow1 == arrow2:
-            if(health2 == health1-50):  # Dem he did damage
+            if(health2 == health1-50 or (health2 == 0 and health1 == 25)):  # Dem he did damage
                 correction = True
                 p1 = 0.2
                 isValid = True
@@ -175,7 +186,7 @@ def R(from_state, action, to_state, actions_to_states):
                     reward = -5
         # Oh he is gonna shoot...
         elif(action == "HIT") and (pos2 == pos1) and arrow1 == arrow2:
-            if(health2 == health1-50):  # Dem he did damage
+            if(health2 == health1-50 or (health2 == 0 and health1 == 25)):  # Dem he did damage
                 if health2 == 0:
                     reward = 45
                 else:
@@ -191,12 +202,7 @@ def R(from_state, action, to_state, actions_to_states):
         elif(pos2 == "E" and action not in ["CRAFT"] and mat2 == mat1 and arrow1 == arrow2):
             reward = -5
         elif(action == "CRAFT" and mat1 > 0 and mat2 == mat1 - 1 and pos1 == pos2):  # successfully crafting
-            if(arrow2 == arrow1+1):
-                reward = -5
-            # 2 arrows crafted
-            if(arrow2 == arrow1+2):
-                reward = -5
-            if(arrow2 == arrow1+3):
+            if arrow2 > arrow1:
                 reward = -5
 
     if pos1 == "S" and health1 == health2 and arrow1 == arrow2:
@@ -229,7 +235,7 @@ def R(from_state, action, to_state, actions_to_states):
                     reward = -5
         # Oh he is gonna shoot...
         elif(action == "HIT") and (pos2 == pos1) and arrow1 == arrow2:
-            if(health2 == health1-50):  # Dem he did damage
+            if(health2 == health1-50 or (health2 == 0 and health1 == 25)):  # Dem he did damage
                 if health2 == 0:
                     reward = 45
                 else:
@@ -251,7 +257,8 @@ def R(from_state, action, to_state, actions_to_states):
                 elif health2 == health1:  # Shit he missed
                     reward = -5
     if reward != 0:
-        if state1 == "R" and state2 == "D":  # He attacked?
+        # He attacked?
+        if (health2 == health1+25 or (health1 == health2 and health2 == 100)) and (pos1 == "C" or pos1 == "E") and arrow2 == 0:
             return -45
     return reward
 
@@ -342,6 +349,8 @@ def get_IJ_next_state(current_state, next_action):
                 arrow2 += 2
             else:
                 arrow2 += 3
+            if arrow2 > 3:
+                arrow2 = 3
 
     if pos1 == "S":
         if next_action == "UP":
@@ -453,6 +462,8 @@ def Indiana_Jones(task, start_state_num):
             optimal_action = "NONE"
             pos1, mat1, arrow1, state1, health1 = from_state
             if health1 == 0:
+                print(
+                    f'({pos1},{mat1},{arrow1},{state1},{health1}):NONE=[{utility_prime[from_state]}]', file=f)
                 continue
             max_utility = None
             valid_actions = []
