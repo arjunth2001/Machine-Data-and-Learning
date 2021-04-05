@@ -168,19 +168,13 @@ def R(from_state, action, to_state, actions_to_states):
         elif(action == "SHOOT") and pos1 == pos2:  # Indiana decided to SHOOT
             if(arrow2 == arrow1-1):  # He shot
                 if health2 == health1-25:  # Successful
-                    if health2 == 0:
-                        reward = 0
-                    else:
-                        reward = -5
+                    reward = -5
                 elif health2 == health1:  # Shit he missed
                     reward = -5
         # Oh he is gonna shoot...
         elif(action == "HIT") and (pos2 == pos1) and arrow1 == arrow2:
             if(health2 == health1-50):  # Dem he did damage
-                if health2 == 0:
-                    reward = 0
-                else:
-                    reward = -5
+                reward = -5
             elif(health2 == health1):  # Shit nothing happened...
                 reward = -5
 
@@ -222,19 +216,13 @@ def R(from_state, action, to_state, actions_to_states):
         elif(action == "SHOOT") and pos1 == pos2:  # Indiana decided to SHOOT
             if(arrow2 == arrow1-1):  # He shot
                 if health2 == health1-25:  # Successful
-                    if health2 == 0:
-                        reward = 0
-                    else:
-                        reward = -5
+                    reward = -5
                 elif health2 == health1:  # Shit he missed
                     reward = -5
         # Oh he is gonna shoot...
         elif(action == "HIT") and (pos2 == pos1) and arrow1 == arrow2:
             if(health2 == health1-50):  # Dem he did damage
-                if health2 == 0:
-                    reward = 0
-                else:
-                    reward = -5
+                reward = -5
             elif(health2 == health1):  # Shit nothing happened...
                 reward = -5
 
@@ -245,10 +233,7 @@ def R(from_state, action, to_state, actions_to_states):
         elif(action == "SHOOT") and pos1 == pos2:  # Indiana decided to SHOOT
             if(arrow2 == arrow1-1):  # He shot
                 if health2 == health1-25:  # Successful
-                    if health2 == 0:
-                        reward = 0
-                    else:
-                        reward = -5
+                    reward = -5
                 elif health2 == health1:  # Shit he missed
                     reward = -5
     if reward != 0:
@@ -295,7 +280,7 @@ def construct_A(possible_actions, states, actions_to_states):
                         temp.append(1-p)
                     else:
                         temp.append(-p)
-                elif from_state[-1] == 0 and action == "NONE":
+                elif from_state == to_state and from_state[-1] == 0 and action == "NONE":
                     temp.append(1)
                 else:
                     temp.append(0)
@@ -338,7 +323,7 @@ def get_optimal_policy(x, states, possible_actions):
 def construct_alpha(states):
     alpha = [0 for pos in ["W", "N", "E", "S", "C"] for mat in range(
         3) for arrow in range(4) for state in ["D", "R"] for health in range(0, 120, 25)]
-    alpha[states.index(("C", 0, 3, "D", 100))] = 1
+    alpha[states.index(("C", 2, 3, "R", 100))] = 1
     return np.expand_dims(np.array(alpha), axis=1)
 
 
