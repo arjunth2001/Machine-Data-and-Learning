@@ -499,8 +499,8 @@ def Indiana_Jones(task, start_state_num):
                     utility_prime[from_state] - utility[from_state]))
         utility = utility_prime.copy()
         # print(f'Max diff is {max_diff}')
-        print("-"*30, file=f)
-        print("\n", file=f)
+        #print("-"*30, file=f)
+        #print("\n", file=f)
         if max_diff < Delta:
             break
     f.close()
