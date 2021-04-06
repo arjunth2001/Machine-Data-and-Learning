@@ -442,7 +442,7 @@ def Indiana_Jones(task, start_state_num):
     if task == 0:
         f = open("outputs/part_2_trace.txt", "w")
     else:
-        f = open(f"outputs/part_2_trace.{task}_trace.txt", "w")
+        f = open(f"outputs/part_2_task_2.{task}_trace.txt", "w")
         if task == 1:
             actions_to_states = {
                 "C": [("UP", "N"), ("DOWN", "S"), ("LEFT", "W"), ("RIGHT", "E"), ("STAY", "C"), ("UP", "E"), ("DOWN", "E"), ("LEFT", "E"), ("STAY", "E"), ("SHOOT", "C"), ("HIT", "C")],
@@ -511,17 +511,18 @@ def Indiana_Jones(task, start_state_num):
         elif start_state_num == 1:
             f2 = open("outputs/part_2_simulation_state_1.txt", "w")
             simulate_IJ_movement(("W", 0, 0, "D", 100), policy, f2)
-        f2.close()
+        if start_state_num != 0:
+            f2.close()
 
 
 if not os.path.exists("./outputs"):
     os.mkdir("outputs")
-Indiana_Jones(0, 1)
-print("done")
-Indiana_Jones(0, 2)
-print("done")
+Indiana_Jones(0, 0)
+# print("done")
+#Indiana_Jones(0, 2)
+# print("done")
 Indiana_Jones(1, 0)
-print("done")
+# print("done")
 Indiana_Jones(2, 0)
-print("done")
+# print("done")
 Indiana_Jones(3, 0)
