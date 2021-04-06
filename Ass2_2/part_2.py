@@ -18,18 +18,26 @@ def P(from_state, action, to_state, actions_to_states):
         p2 = 0.5
     else:  # He attacked?
         p2 = 0.5
-        if (pos1 == "C" or pos1 == "E") and (health1 == health2 and health2 != 100):
+        if (pos1 == "C" or pos1 == "E") and (health1 >= health2 and health2 != 100):
+            return 0
+        if (pos1 == "C" or pos1 == "E") and (arrow2 != 0):
             return 0
             # SHit he successfully did it...
         if((health2 == health1+25 or (health1 == health2 and health2 == 100)) and (pos1 == "C" or pos1 == "E") and arrow2 == 0):
             if(pos1 == pos2 and mat1 == mat2):
-                return p2
+                if (action == "SHOOT" and arrow1 == 0) or (action == "CRAFT" and mat1 == 0):
+                    return 0
+                else:
+                    return p2
+
             else:
                 return 0
 
     if pos1 == "C" and mat1 == mat2:  # if in center square, mat equal
         # Successfully Moved
-        if((action, pos2) in actions_to_states["C"][0:5] and health1 == health2 and arrow1 == arrow2):
+        if pos2 == "E" and action == "RIGHT" and health1 == health2 and arrow1 == arrow2:
+            p1 = 1.0
+        elif((action, pos2) in actions_to_states["C"][0:5] and health1 == health2 and arrow1 == arrow2):
             p1 = 0.85
         # failed
         elif(pos2 == "E" and action not in ["SHOOT", "HIT"] and health1 == health2 and arrow1 == arrow2):
@@ -81,6 +89,8 @@ def P(from_state, action, to_state, actions_to_states):
             if arrow1 == 2:
                 if arrow2 == 3:
                     p1 = 1
+            if arrow1 == 3 and arrow2 == 3:
+                p1 = 1
 
     if pos1 == "S" and health1 == health2 and arrow1 == arrow2:
         # Successfully Moved
@@ -91,9 +101,11 @@ def P(from_state, action, to_state, actions_to_states):
         elif(pos2 == "E" and action not in ["GATHER"] and mat2 == mat1):
             p1 = 0.15
 
-        elif(action == "GATHER" and mat1 != 2 and pos1 == pos2):
+        elif(action == "GATHER" and pos1 == pos2):
             # Successfully gathered material
-            if mat1 == mat2-1:
+            if mat1 == mat2 and mat1 == 2:
+                p1 = 1
+            elif mat1 == mat2-1:
                 p1 = 0.75
 
             # failed
@@ -145,12 +157,17 @@ def R(from_state, action, to_state, actions_to_states):
     pos2, mat2, arrow2, state2, health2 = to_state
 
     if state1 == "R" and state2 == "D":
-        if (pos1 == "C" or pos1 == "E") and (health1 == health2 and health2 != 100):
+        if (pos1 == "C" or pos1 == "E") and (health1 >= health2 and health2 != 100):
             return 0
             # SHit he successfully did it...
+        if (pos1 == "C" or pos1 == "E") and (arrow2 != 0):
+            return 0
         if((health2 == health1+25 or (health1 == health2 and health2 == 100)) and (pos1 == "C" or pos1 == "E") and arrow2 == 0):
             if(pos1 == pos2 and mat1 == mat2):
-                return -45
+                if (action == "SHOOT" and arrow1 == 0) or (action == "CRAFT" and mat1 == 0):
+                    return 0
+                else:
+                    return -45
             else:
                 return 0
 
@@ -188,7 +205,7 @@ def R(from_state, action, to_state, actions_to_states):
         elif(pos2 == "E" and action not in ["CRAFT"] and mat2 == mat1 and arrow1 == arrow2):
             reward = -5
         elif(action == "CRAFT" and mat1 > 0 and mat2 == mat1 - 1 and pos1 == pos2):  # successfully crafting
-            if arrow2 > arrow1:
+            if arrow2 >= arrow1:
                 reward = -5
 
     if pos1 == "S" and health1 == health2 and arrow1 == arrow2:
@@ -198,9 +215,11 @@ def R(from_state, action, to_state, actions_to_states):
         # failed
         elif(pos2 == "E" and action not in ["GATHER"] and mat2 == mat1):
             reward = -5
-        elif(action == "GATHER" and mat1 != 2 and pos2 == pos1):
+        elif(action == "GATHER" and pos2 == pos1):
             # Successfully gathered material
-            if mat1 == mat2-1:
+            if mat1 == mat2 and mat1 == 2:
+                reward = -5
+            elif mat1 == mat2-1:
                 reward = -5
             # failed
             elif mat1 == mat2:
@@ -348,6 +367,8 @@ def get_IJ_next_state(current_state, next_action):
         if next_action == "GATHER":
             if action_is_successful(0.75):
                 mat2 += 1
+                if mat2 >= 2:
+                    mat2 = 2
 
     if pos1 == "E":
         if next_action == "LEFT":
@@ -458,12 +479,15 @@ def Indiana_Jones(task, start_state_num):
                 for to_state in states:
                     p = P(from_state, action, to_state, actions_to_states)
                     r = R(from_state, action, to_state, actions_to_states)
+                    # if(from_state == ('S', 2, 0, 'D', 25) and iteration_number == 0 and p != 0):
+                    #     print(
+                    #         f"{from_state} , {to_state} - {action} - {p} , {r}, {utility[to_state]}")
                     if(p != 0):
                         isValid = True
                         # if pos1 == "W" and action == "UP":
                         #     print(f'P={p} and R={r}')
                     if task == 2 and action == "STAY":
-                        r = 0
+                        r += 5
                     sum_of_all_next_state_utilities += (
                         p * (r + (Gamma * utility[to_state])))
                 if isValid:
@@ -481,8 +505,10 @@ def Indiana_Jones(task, start_state_num):
                     utility_prime[from_state] - utility[from_state]))
         utility = utility_prime.copy()
         # print(f'Max diff is {max_diff}')
-        #print("-"*30, file=f)
-        #print("\n", file=f)
+        # print("-"*30, file=f)
+        # print("\n", file=f)
+        # if(iteration_number == 1):
+        #     quit()
         if max_diff < Delta:
             break
     f.close()
@@ -499,12 +525,12 @@ def Indiana_Jones(task, start_state_num):
 
 if not os.path.exists("./outputs"):
     os.mkdir("outputs")
-Indiana_Jones(0, 0)
-# print("done")
-#Indiana_Jones(0, 2)
-# print("done")
+Indiana_Jones(0, 1)
+print("done")
+Indiana_Jones(0, 2)
+print("done")
 Indiana_Jones(1, 0)
-# print("done")
+print("done")
 Indiana_Jones(2, 0)
-# print("done")
+print("done")
 Indiana_Jones(3, 0)
