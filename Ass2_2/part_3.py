@@ -387,8 +387,8 @@ def LP():
     }
     with open("./outputs/part_3_output.json", "w") as f:
         json.dump(final_output, f)
-    for i in optimal_policy:
-        print(i)
+    # for i in optimal_policy:
+    #     print(i)
 
 
 if not os.path.exists("./outputs"):

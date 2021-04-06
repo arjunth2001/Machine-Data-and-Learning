@@ -525,12 +525,12 @@ def Indiana_Jones(task, start_state_num):
 
 if not os.path.exists("./outputs"):
     os.mkdir("outputs")
-Indiana_Jones(0, 1)
-print("done")
-Indiana_Jones(0, 2)
-print("done")
+Indiana_Jones(0, 0)
+# print("done")
+#Indiana_Jones(0, 2)
+# print("done")
 Indiana_Jones(1, 0)
-print("done")
+# print("done")
 Indiana_Jones(2, 0)
-print("done")
+# print("done")
 Indiana_Jones(3, 0)
