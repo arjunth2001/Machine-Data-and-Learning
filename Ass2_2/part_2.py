@@ -6,9 +6,6 @@ def P(from_state, action, to_state, actions_to_states):
     pos1, mat1, arrow1, state1, health1 = from_state
     pos2, mat2, arrow2, state2, health2 = to_state
     p1 = 0
-    correction = False
-    isAttacked = False
-    isValid = False
 
     # Demon Slayer
     p2 = 0
@@ -21,145 +18,124 @@ def P(from_state, action, to_state, actions_to_states):
         p2 = 0.5
     else:  # He attacked?
         p2 = 0.5
-        # SHit he successfully did it...
+        if (pos1 == "C" or pos1 == "E") and (health1 == health2 and health2 != 100):
+            return 0
+            # SHit he successfully did it...
         if((health2 == health1+25 or (health1 == health2 and health2 == 100)) and (pos1 == "C" or pos1 == "E") and arrow2 == 0):
-            isAttacked = True
+            if(pos1 == pos2 and mat1 == mat2):
+                return p2
+            else:
+                return 0
 
     if pos1 == "C" and mat1 == mat2:  # if in center square, mat equal
         # Successfully Moved
         if((action, pos2) in actions_to_states["C"][0:5] and health1 == health2 and arrow1 == arrow2):
             p1 = 0.85
-            isValid = True
-            correction = True
         # failed
         elif(pos2 == "E" and action not in ["SHOOT", "HIT"] and health1 == health2 and arrow1 == arrow2):
             p1 = 0.15
-            isValid = True
         elif(action == "SHOOT") and pos1 == pos2:  # Indiana decided to SHOOT
             if(arrow2 == arrow1-1):  # He shot
                 if health2 == health1-25:  # Successful
                     p1 = 0.5
-                    isValid = True
-                    correction = True
+
                 elif health2 == health1:  # Shit he missed
-                    isValid = True
+
                     p1 = 0.5
         # Oh he is gonna shoot...
         elif(action == "HIT") and (pos2 == pos1) and arrow1 == arrow2:
             if(health2 == health1-50 or (health2 == 0 and health1 == 25)):  # Dem he did damage
-                correction = True
-                isValid = True
+
                 p1 = 0.1
             elif(health2 == health1):  # Shit nothing happened...
-                isValid = True
+
                 p1 = 0.9
 
     if pos1 == "N" and health1 == health2:
         # Successfully Moved
         if((action, pos2) in actions_to_states["N"][0:2] and arrow1 == arrow2 and mat1 == mat2):
-            correction = True
-            isValid = True
+
             p1 = 0.85
         # failed
         elif(pos2 == "E" and action not in ["CRAFT"] and mat2 == mat1 and arrow1 == arrow2):
             p1 = 0.15
-            isValid = True
+
         elif(action == "CRAFT" and mat1 > 0 and mat2 == mat1 - 1 and pos1 == pos2):  # successfully crafting
             if arrow1 == 0:
                 # 1 arrow crafted
                 if(arrow2 == arrow1+1):
                     p1 = 0.5
-                    correction = True
-                    isValid = True
+
                 # 2 arrows crafted
                 if(arrow2 == arrow1+2):
                     p1 = 0.35
-                    correction = True
-                    isValid = True
+
                 # 3 arrows crafted
                 if(arrow2 == arrow1+3):
                     p1 = 0.15
-                    correction = True
-                    isValid = True
+
             if arrow1 == 1:
                 if arrow2 == 2 or arrow2 == 3:
                     p1 = 0.5
-                    correction = True
-                    isValid = True
+
             if arrow1 == 2:
                 if arrow2 == 3:
                     p1 = 1
-                    correction = True
-                    isValid = True
 
     if pos1 == "S" and health1 == health2 and arrow1 == arrow2:
         # Successfully Moved
         if((action, pos2) in actions_to_states["S"][0:2] and mat1 == mat2):
-            correction = True
-            isValid = True
+
             p1 = 0.85
         # failed
         elif(pos2 == "E" and action not in ["GATHER"] and mat2 == mat1):
             p1 = 0.15
-            isValid = True
+
         elif(action == "GATHER" and mat1 != 2 and pos1 == pos2):
             # Successfully gathered material
             if mat1 == mat2-1:
                 p1 = 0.75
-                correction = True
-                isValid = True
+
             # failed
             elif mat1 == mat2:
                 p1 = 0.25
-                isValid = True
 
     if pos1 == "E" and mat1 == mat2:
         # Successfully Moved
         if((action, pos2) in actions_to_states["E"][0:2] and health1 == health2 and arrow1 == arrow2):
-            correction = True
+
             p1 = 1.0
-            isValid = True
+
         elif(action == "SHOOT") and pos1 == pos2:  # Indiana decided to SHOOT
             if(arrow2 == arrow1-1):  # He shot
                 if health2 == health1-25:  # Successful
                     p1 = 0.9
-                    correction = True
-                    isValid = True
+
                 elif health2 == health1:  # Shit he missed
                     p1 = 0.1
-                    isValid = True
+
         # Oh he is gonna shoot...
         elif(action == "HIT") and (pos2 == pos1) and arrow1 == arrow2:
             if(health2 == health1-50 or (health2 == 0 and health1 == 25)):  # Dem he did damage
-                correction = True
+
                 p1 = 0.2
-                isValid = True
+
             elif(health2 == health1):  # Shit nothing happened...
                 p1 = 0.8
-                isValid = True
 
     if pos1 == "W" and mat1 == mat2:
         # Successfully Moved
         if((action, pos2) in actions_to_states["W"][0:2] and health1 == health2 and arrow1 == arrow2):
-            correction = True
-            isValid = True
+
             p1 = 1.0
         elif(action == "SHOOT") and pos1 == pos2:  # Indiana decided to SHOOT
             if(arrow2 == arrow1-1):  # He shot
                 if health2 == health1-25:  # Successful
                     p1 = 0.25
-                    isValid = True
-                    correction = True
+
                 elif health2 == health1:  # Shit he missed
                     p1 = 0.75
-                    isValid = True
 
-    if not isValid:
-        return 0
-    if isAttacked and not correction:
-        return p2
-    if isAttacked and correction:
-        return 0
     return p1*p2
 
 
@@ -167,6 +143,16 @@ def R(from_state, action, to_state, actions_to_states):
     reward = 0
     pos1, mat1, arrow1, state1, health1 = from_state
     pos2, mat2, arrow2, state2, health2 = to_state
+
+    if state1 == "R" and state2 == "D":
+        if (pos1 == "C" or pos1 == "E") and (health1 == health2 and health2 != 100):
+            return 0
+            # SHit he successfully did it...
+        if((health2 == health1+25 or (health1 == health2 and health2 == 100)) and (pos1 == "C" or pos1 == "E") and arrow2 == 0):
+            if(pos1 == pos2 and mat1 == mat2):
+                return -45
+            else:
+                return 0
 
     if pos1 == "C" and mat1 == mat2:  # if in center square, mat equal
         # Successfully Moved
@@ -256,10 +242,6 @@ def R(from_state, action, to_state, actions_to_states):
                         reward = -5
                 elif health2 == health1:  # Shit he missed
                     reward = -5
-    if reward != 0:
-        # He attacked?
-        if (health2 == health1+25 or (health1 == health2 and health2 == 100)) and (pos1 == "C" or pos1 == "E") and arrow2 == 0:
-            return -45
     return reward
 
 
