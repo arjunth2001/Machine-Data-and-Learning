@@ -1,0 +1,11 @@
+Step Number: 1  Current State: (C,2,0,R,100)  Taking Action: UP
+Step Number: 2  Current State: (C,2,0,D,100)  Taking Action: RIGHT
+Step Number: 3  Current State: (E,2,0,D,100)  Taking Action: HIT
+Step Number: 4  Current State: (E,2,0,D,100)  Taking Action: HIT
+Step Number: 5  Current State: (E,2,0,D,100)  Taking Action: HIT
+Step Number: 6  Current State: (E,2,0,D,100)  Taking Action: HIT
+Step Number: 7  Current State: (E,2,0,D,100)  Taking Action: HIT
+Step Number: 8  Current State: (E,2,0,D,100)  Taking Action: HIT
+Step Number: 9  Current State: (E,2,0,D,100)  Taking Action: HIT
+Step Number: 10  Current State: (E,2,0,D,50)  Taking Action: HIT
+Step Number: 11  Current State: (E,2,0,D,0)  Taking Action: NONE
