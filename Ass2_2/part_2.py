@@ -415,6 +415,32 @@ def simulate_IJ_movement(start_state, policy, f2):
         step_count += 1
 
 
+def build_state(actions_to_states, states):
+    to_states = {}
+
+    for state in states:
+        to_states[state] = []
+
+    for from_state in states:
+        pos1, mat1, arrow1, state1, health1 = from_state
+        if health1 == 0:
+            continue
+        valid_actions = []
+        for i_state in actions_to_states[pos1]:
+            valid_actions.append(i_state[0])
+        valid_actions = set(valid_actions)
+        for action in valid_actions:
+            for to_state in states:
+                p = P(from_state, action, to_state, actions_to_states)
+                r = R(from_state, action, to_state, actions_to_states)
+                if(p != 0):
+                    to_states[from_state].append(to_state)
+
+    for state in states:
+        to_states[state] = list(set(to_states[state]))
+    return to_states
+
+
 def Indiana_Jones(task, start_state_num):
     actions_to_states = {
         "C": [("UP", "N"), ("DOWN", "S"), ("LEFT", "W"), ("RIGHT", "E"), ("STAY", "C"), ("UP", "E"), ("DOWN", "E"), ("LEFT", "E"), ("STAY", "E"), ("SHOOT", "C"), ("HIT", "C")],
@@ -457,6 +483,7 @@ def Indiana_Jones(task, start_state_num):
         if task == 3:
             Gamma = 0.25
     iteration_number = -1
+    to_states = build_state(actions_to_states, states)
     while True:
         iteration_number += 1
         print(f'iteration={iteration_number}', file=f)
@@ -476,7 +503,7 @@ def Indiana_Jones(task, start_state_num):
             for action in valid_actions:
                 sum_of_all_next_state_utilities = 0
                 isValid = False
-                for to_state in states:
+                for to_state in to_states[from_state]:
                     p = P(from_state, action, to_state, actions_to_states)
                     r = R(from_state, action, to_state, actions_to_states)
                     # if(from_state == ('S', 2, 0, 'D', 25) and iteration_number == 0 and p != 0):
@@ -527,7 +554,7 @@ if not os.path.exists("./outputs"):
     os.mkdir("outputs")
 Indiana_Jones(0, 0)
 # print("done")
-#Indiana_Jones(0, 2)
+# Indiana_Jones(0, 2)
 # print("done")
 Indiana_Jones(1, 0)
 # print("done")
