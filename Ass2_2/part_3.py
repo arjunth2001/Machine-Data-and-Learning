@@ -300,12 +300,19 @@ def construct_A(possible_actions, states, actions_to_states):
             for action in possible_actions[from_state]:
                 p = P(from_state, action, to_state, actions_to_states)
                 if from_state == to_state:
-                    temp.append(1-p)
+                    if action == "NONE":
+                        temp.append(1)
+                    else:
+                        temp.append(1-p)
+
                 else:
-                    if p == 0:
+                    if action == "NONE":
                         temp.append(0)
                     else:
-                        temp.append(-p)
+                        if p == 0:
+                            temp.append(0)
+                        else:
+                            temp.append(-p)
         A.append(temp)
     return np.array(A)
 
@@ -314,6 +321,9 @@ def construct_R(possible_actions, states, actions_to_states):
     Reward = []
     for state in states:
         for action in possible_actions[state]:
+            if action == "NONE":
+                Reward.append(0)
+                continue
             R_s_a = 0
             for to_state in states:
                 p = P(state, action, to_state, actions_to_states)
@@ -385,8 +395,8 @@ def LP():
     }
     with open("./outputs/part_3_output.json", "w") as f:
         json.dump(final_output, f)
-    for i in optimal_policy:
-        print(i)
+    # for i in optimal_policy:
+    #     print(i)
 
 
 if not os.path.exists("./outputs"):
