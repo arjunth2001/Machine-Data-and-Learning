@@ -130,15 +130,15 @@ def down(x1a, y1a, x1t, y1t, k1, a, x2a, y2a, x2t, y2t, k2):
 
 def calc_trans_prob(i1, j1, k1, a, i2, j2, k2):
 
-    x1a = int(i1/2)
-    y1a = i1 % 2
-    x2a = int(i2/2)
-    y2a = i2 % 2
+    x1a = i1 % 4
+    y1a = int(i1/4)
+    x2a = i2 % 4
+    y2a = int(i2/4)
 
-    x1t = int(j1/2)
-    y1t = j1 % 2
-    x2t = int(j2/2)
-    y2t = j2 % 2
+    x1t = j1 % 4
+    y1t = int(j1/4)
+    x2t = j2 % 4
+    y2t = int(j2/4)
 
     # print("Calculating for (", x1a,y1a,") and (", x2a, y2a,")")
     # print("Calculating for (", x1t,y1t,") tnd (", x2t, y2t,")")
@@ -171,11 +171,11 @@ def calc_trans_prob(i1, j1, k1, a, i2, j2, k2):
 
 
 def calc_obs_prob(i1, j1, k1):
-    x1a = int(i1/2)
-    y1a = i1 % 2
+    x1a = i1 % 4
+    y1a = int(i1/4)
 
-    x1t = int(j1/2)
-    y1t = j1 % 2
+    x1t = j1 % 4
+    y1t = int(j1/4)
 
     if(x1a == x1t and y1a == y1t):
         return "o1"
