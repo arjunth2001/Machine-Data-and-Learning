@@ -283,10 +283,10 @@ def gen_start_states1():
 def gen_start_states2():
 
     s = []
-    s.append(comp_to_num(1, 2, 0))
-    s.append(comp_to_num(1, 4, 0))
-    s.append(comp_to_num(1, 0, 0))
-    s.append(comp_to_num(1, 1, 0))
+    s.append(comp_to_num(5, 1, 0))
+    s.append(comp_to_num(5, 4, 0))
+    s.append(comp_to_num(5, 5, 0))
+    s.append(comp_to_num(5, 6, 0))
 
     # start include: 1 3
     print("start include:", s[0], s[1], s[2], s[3])
@@ -295,18 +295,18 @@ def gen_start_states2():
 def gen_start_states4():
 
     print("start: ", end='')
-    for i in range(162):
+    for i in range(128):
         pr_a = 0
         pr_t = 0
         pr_c = 0.5
 
         a, t, c = num_to_comp(i)
-        if(a == 1):
-            pr_a = 0.6
-        elif(a == 7):
+        if(a == 0):
             pr_a = 0.4
+        elif(a == 7):
+            pr_a = 0.6
 
-        if(t == 0 or t == 2 or t == 8 or t == 6):
+        if(t == 1 or t == 2 or t == 5 or t == 6):
             pr_t = 0.25
 
         pr = pr_a*pr_c*pr_t
