@@ -33,10 +33,14 @@ def check_call(k1, k2, i1, j1):
     nothing = 0.4
 
     if(i1 == j1):
-        if(k2 == 0):
-            pr_call = turn_off+nothing
-        else:
+        if(k1 == 0 and k2 == 1):
             pr_call = switch_on
+        elif(k1 == 0 and k2 == 0):
+            pr_call = nothing+turn_off
+        elif(k1 == 1 and k2 == 0):
+            pr_call = 1
+        elif(k1 == 1 and k2 == 1):
+            pr_call = 0
     else:
         if(k1 == 0 and k2 == 1):
             pr_call = switch_on
